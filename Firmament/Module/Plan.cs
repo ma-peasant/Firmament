@@ -41,14 +41,6 @@ namespace Firmament.Module
             this.BeginAnimation(Canvas.TopProperty, daY);
             //image.Source = null;
             //image = null;
-
-            //Storyboard myStoryboard = new Storyboard();
-            //myStoryboard.Children.Add(daX);
-            //myStoryboard.Children.Add(daY);
-            //Storyboard.SetTargetName(daX, image.Name);
-            //Storyboard.SetTargetProperty(daX, new PropertyPath(Image.WidthProperty));
-
-            //myStoryboard.Begin();
         }
         public Rect getRec() {
             return new Rect(Canvas.GetLeft(this),Canvas.GetTop(this),30,30);

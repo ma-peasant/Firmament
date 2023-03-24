@@ -36,7 +36,12 @@ namespace Firmament
             this.Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
             this.KeyUp += MainWindow_KeyUp;
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
+        }
 
+        private void CompositionTarget_Rendering(object sender, EventArgs e)
+        {
+            //throw new NotImplementedException();
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
@@ -47,15 +52,6 @@ namespace Firmament
                     role.StopShoot();
                     break;
             }
-            //        Thread thread = new Thread(() =>
-            //{
-            //    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //    {
-
-            //        }
-            //    });
-            //});
-            //thread.Start();
             e.Handled = true;
         }
 
@@ -118,15 +114,6 @@ namespace Firmament
                     role.Shoot();
                     break;
             }
-            //        Thread thread = new Thread(() =>
-            //{
-            //    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //    {
-                   
-            //        }
-            //    });
-            //});
-            //thread.Start();
             e.Handled = true;
         }
 
@@ -202,7 +189,6 @@ namespace Firmament
 
         private void AdjustBullet()
         {
-
             System.Timers.Timer timer = new System.Timers.Timer(100);
             timer.Elapsed += Timer_Elapsed_Bullet;
             timer.AutoReset = true;
@@ -210,21 +196,16 @@ namespace Firmament
         }
         private void Timer_Elapsed_Bullet(object sender, System.Timers.ElapsedEventArgs e)
         {
-            Parallel.ForEach(plans, plan =>
-            {
-                AdjustBullet(plan, role.bullets);
-              
-            });
-            //for (int i = 0; i < plans.Count; i++)
-            //{
-            //    new TaskFactory().StartNew(() =>
-            //    {
-            //        Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //        {
-            //            AdjustBullet(plans[i], bullets);
-            //        });
-            //    });
-            //}
+            if (plans.Count > 0) {
+                Parallel.ForEach(plans, plan =>
+                {
+                    if (role.bullets.Count > 0)
+                    {
+                        AdjustBullet(plan, role.bullets);
+                    }
+
+                });
+            }
         }
         private void AdjustBullet(Plan plan ,  List<Bullet> bullets)
         {
@@ -245,7 +226,7 @@ namespace Firmament
 
                         // 在游戏中移除两个飞机
                         canvas.Children.Remove(plan);
-                        bullet.Clear();
+                        canvas.Children.Remove(bullet);
                         //MessageBox.Show("飞机相撞,game over");
                     }
                 });
