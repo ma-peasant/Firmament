@@ -13,37 +13,36 @@ namespace Firmament.Module
     /// <summary>
     ///子弹类
     /// </summary>
-   public  class Bullet : Shape
+    public class Bullet
     {
         private int speed = 10;
-        //private Canvas _canvas;
 
-        protected override Geometry DefiningGeometry { get; }
+        public Rectangle rectangle;
 
-        public Bullet(Canvas canvas,Role role)
+        public Bullet(Role role)
         {
-            this.Fill = new SolidColorBrush(Colors.Red);
-            this.Width = 2;
-            this.Height = 5;
-            Canvas.SetLeft(this, Canvas.GetLeft(role) + 13);
-            Canvas.SetTop(this, Canvas.GetTop(role));
-            canvas.Children.Add(this);
-            //_canvas = canvas;
+            rectangle = new Rectangle();
+            rectangle.Fill = new SolidColorBrush(Colors.Red);
+            rectangle.Width = 2;
+            rectangle.Height = 5;
+            Canvas.SetLeft(rectangle, Canvas.GetLeft(role) + 13);
+            Canvas.SetTop(rectangle, Canvas.GetTop(role));
             Move(role);
         }
 
-        public void Move(Role role) {
+        public void Move(Role role)
+        {
             DoubleAnimation daY = new DoubleAnimation();
             daY.From = Canvas.GetTop(role);
             daY.To = 0;
-            double second  = Canvas.GetTop(role) / 100;
+            double second = Canvas.GetTop(role) / 100;
 
             daY.Duration = new System.Windows.Duration(TimeSpan.FromSeconds(second));
-            this.BeginAnimation(Canvas.TopProperty,daY);
+            rectangle.BeginAnimation(Canvas.TopProperty, daY);
         }
         public Rect getRec()
         {
-            return new Rect(Canvas.GetLeft(this), Canvas.GetTop(this), 2, 5);
+            return new Rect(Canvas.GetLeft(rectangle), Canvas.GetTop(rectangle), 2, 5);
 
         }
     }

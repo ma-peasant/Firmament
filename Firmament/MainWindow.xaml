@@ -14,9 +14,9 @@
             <ColumnDefinition Width="0.3*"/>
         </Grid.ColumnDefinitions>
         <Canvas  Margin="0" Name="canvas" Grid.Column="0" Grid.Row="0" Background="SlateGray">
-            <Ellipse x:Name="bullet1" Fill="Red" Width="10" Height="10" Canvas.Left="50" Canvas.Top="50" />
+            <!--<Ellipse x:Name="bullet1" Fill="Red" Width="10" Height="10" Canvas.Left="50" Canvas.Top="50" />
             <Rectangle x:Name="bullet2" Fill="Blue" Width="10" Height="10" Canvas.Left="100" Canvas.Top="50" />
-            <Rectangle x:Name="bullet3" Fill="Green" Width="10" Height="10" Canvas.Left="150" Canvas.Top="50" />
+            <Rectangle x:Name="bullet3" Fill="Green" Width="10" Height="10" Canvas.Left="150" Canvas.Top="50" />-->
         </Canvas>
 
 

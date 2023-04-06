@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,12 +25,16 @@ namespace Firmament
     /// </summary>
     public partial class MainWindow : Window
     {
+        //敌机集合
         List<Plan> plans = new List<Plan>();
    
         Role role = null;
         double left = 0;
         double top = 0;
 
+        bool isSKeyPressed = false;
+
+        System.Timers.Timer sKeyDownTimer = new System.Timers.Timer();
         public MainWindow()
         {
             InitializeComponent();
@@ -37,8 +42,31 @@ namespace Firmament
             this.KeyDown += MainWindow_KeyDown;
             this.KeyUp += MainWindow_KeyUp;
             CompositionTarget.Rendering += CompositionTarget_Rendering;
+
+
+            sKeyDownTimer = new System.Timers.Timer();
+            sKeyDownTimer.Interval = 100; // 计时器间隔为 100 毫秒
+            sKeyDownTimer.AutoReset = true;
+            sKeyDownTimer.Elapsed += SKeyDownTimer_Elapsed;
         }
 
+        private void SKeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (isSKeyPressed)
+            {
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    canvas.Children.Add(role.Shoot());
+                });
+            }
+            else
+            {
+                sKeyDownTimer.Stop();
+              
+            }
+        }
+
+      
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
             //throw new NotImplementedException();
@@ -49,7 +77,12 @@ namespace Firmament
             switch (e.Key)
             {
                 case Key.S:
-                    role.StopShoot();
+                    if (role != null)
+                    {
+                        isSKeyPressed = false;
+                        sKeyDownTimer.Stop();
+                        canvas.Children.Add(role.Shoot());
+                    }
                     break;
             }
             e.Handled = true;
@@ -57,70 +90,86 @@ namespace Firmament
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-
-            switch (e.Key)
-            {
-                case Key.Left:
-                    left = left - 10;
-                    if (left <= 0)
-                    {
-                        left = 0;
-                    }
-                    else if (left >= canvas.ActualWidth - 30)
-                    {
-
-                        left = canvas.ActualWidth - 30;
-                    }
-                    Canvas.SetLeft(role, left);
-                    break;
-                case Key.Right:
-                    left = left + 10;
-                    if (left <= 0)
-                    {
-                        left = 0;
-                    }
-                    else if (left >= canvas.ActualWidth - 30)
-                    {
-                        left = canvas.ActualWidth - 30;
-                    }
-                    Canvas.SetLeft(role, left);
-                    break;
-                case Key.Up:
-
-                    top = top - 10;
-                    if (top <= 0)
-                    {
-                        top = 0;
-                    }
-                    else if (top >= canvas.ActualHeight - 30)
-                    {
-                        top = canvas.ActualHeight - 30;
-                    }
-                    Canvas.SetTop(role, top);
-                    break;
-                case Key.Down:
-                    top = top + 10;
-                    if (top <= 0)
-                    {
-                        top = 0;
-                    }
-                    else if (top >= canvas.ActualHeight - 30)
-                    {
-                        top = canvas.ActualHeight - 30;
-                    }
-                    Canvas.SetTop(role, top);
-                    break;
-                case Key.S:
-                    role.Shoot();
-                    break;
-            }
+            HandleKeyDown(e);
             e.Handled = true;
+        }
+
+        private async void HandleKeyDown(KeyEventArgs e) {
+
+            Console.WriteLine(e.Key.ToString());
+           await Task.Run(() =>
+            {
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        left = left - 10;
+                        if (left <= 0)
+                        {
+                            left = 0;
+                        }
+                        else if (left >= canvas.ActualWidth - 30)
+                        {
+
+                            left = canvas.ActualWidth - 30;
+                        }
+                        
+                        break;
+                    case Key.Right:
+                        left = left + 10;
+                        if (left <= 0)
+                        {
+                            left = 0;
+                        }
+                        else if (left >= canvas.ActualWidth - 30)
+                        {
+                            left = canvas.ActualWidth - 30;
+                        }
+                        break;
+                    case Key.Up:
+
+                        top = top - 10;
+                        if (top <= 0)
+                        {
+                            top = 0;
+                        }
+                        else if (top >= canvas.ActualHeight - 30)
+                        {
+                            top = canvas.ActualHeight - 30;
+                        }
+                        break;
+                    case Key.Down:
+                        top = top + 10;
+                        if (top <= 0)
+                        {
+                            top = 0;
+                        }
+                        else if (top >= canvas.ActualHeight - 30)
+                        {
+                            top = canvas.ActualHeight - 30;
+                        }
+                        break;
+                    case Key.S:
+
+                        isSKeyPressed = true;
+                        sKeyDownTimer.Start();
+                       
+                        break;
+                }
+            });
+            Canvas.SetLeft(role, left);
+            Canvas.SetTop(role, top);
+        }
+
+      
+        // Define the method you want to trigger
+        private void Shoot(object sender, ElapsedEventArgs e)
+        {
+            // Do something
+
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
-
         }
 
 
@@ -128,20 +177,20 @@ namespace Firmament
         {
             //new TaskFactory().StartNew(ControlMove)
             //canvas = new Canvas();
-            Plan plan = new Plan(this.canvas);
+            Plan plan = new Plan();
             plans.Add(plan);
-            plan.Show();
+            canvas.Children.Add(plan);
+            plan.Show(canvas.ActualWidth,canvas.ActualHeight);
 
-
-            role = new Role(this.canvas);
+            role = new Role();
+            canvas.Children.Add(role);
             left = canvas.ActualWidth / 2;
             top = canvas.ActualHeight - 50;
-
+            //让角色位于中间
             Canvas.SetLeft(role, left);
             Canvas.SetTop(role, top);
 
             AdjustAll();
-            AdjustBullet();
         }
 
         private void AdjustPositatiom(Plan plan)
@@ -168,7 +217,6 @@ namespace Firmament
 
         private void AdjustAll()
         {
-
             System.Timers.Timer timer = new System.Timers.Timer(1000);
             timer.Elapsed += Timer_Elapsed;
             timer.AutoReset = true;
@@ -177,61 +225,17 @@ namespace Firmament
 
         private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            for (int i = 0; i < plans.Count; i++)
+            Task.Run(() =>
             {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                for (int i = 0; i < plans.Count; i++)
                 {
-                    AdjustPositatiom(plans[i]);
-                });
-
-            }
-        }
-
-        private void AdjustBullet()
-        {
-            System.Timers.Timer timer = new System.Timers.Timer(100);
-            timer.Elapsed += Timer_Elapsed_Bullet;
-            timer.AutoReset = true;
-            timer.Start();
-        }
-        private void Timer_Elapsed_Bullet(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (plans.Count > 0) {
-                Parallel.ForEach(plans, plan =>
-                {
-                    if (role.bullets.Count > 0)
+                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                     {
-                        AdjustBullet(plan, role.bullets);
-                    }
-
-                });
-            }
-        }
-        private void AdjustBullet(Plan plan ,  List<Bullet> bullets)
-        {
-            Parallel.ForEach(bullets, bullet =>
-            {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    // 判断两个矩形是否相交
-                    bool isCollision = plan.getRec().IntersectsWith(bullet.getRec());
-
-                    // 如果发生碰撞
-                    if (isCollision)
-                    {
-
-                        // 设置两个飞机的状态为销毁
-                        //role.IsDestroyed = true;
-                        //plan.IsDestroyed = true;
-
-                        // 在游戏中移除两个飞机
-                        canvas.Children.Remove(plan);
-                        canvas.Children.Remove(bullet);
-                        //MessageBox.Show("飞机相撞,game over");
-                    }
-                });
-              
+                        AdjustPositatiom(plans[i]);
+                    });
+                }
             });
+          
         }
     }
 }

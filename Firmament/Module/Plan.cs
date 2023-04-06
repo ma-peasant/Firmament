@@ -13,16 +13,13 @@ namespace Firmament.Module
     //暂时是
    public class Plan :Image
     {
-        private Canvas _canvas;
-        public Plan(Canvas canvas)
+        public Plan()
         {
             this.Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
             this.Width = 30;
             this.Height = 30;
-            canvas.Children.Add(this);
-            this._canvas = canvas;
         }
-        public void Show() {
+        public void Show(double x , double y) {
             DoubleAnimation daX = new DoubleAnimation();
             DoubleAnimation daY = new DoubleAnimation();
             //指定起点
@@ -30,8 +27,8 @@ namespace Firmament.Module
             daY.From = 0;
             //指定终点
             //Random r = new Random();
-            daX.To = this._canvas.ActualWidth;
-            daY.To = this._canvas.ActualHeight;
+            daX.To = x;
+            daY.To = y;
             //指定时长
             Duration duration = new Duration(TimeSpan.FromSeconds(10));
             daX.Duration = duration;
