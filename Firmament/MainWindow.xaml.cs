@@ -1,8 +1,10 @@
 ﻿using Firmament.Module;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -33,154 +35,190 @@ namespace Firmament
         double top = 0;
 
         bool isSKeyPressed = false;
-
-        System.Timers.Timer sKeyDownTimer = new System.Timers.Timer();
+        bool isLeftKeyPressed = false;
+        bool isRightKeyPressed = false;
+        bool isUpKeyPressed = false;
+        bool isDownKeyPressed = false;
+        
+        //开一个定时器 ，专门处理按钮点击
+        System.Timers.Timer KeyDownTimer = new System.Timers.Timer();
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
             this.KeyUp += MainWindow_KeyUp;
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
-
-
-            sKeyDownTimer = new System.Timers.Timer();
-            sKeyDownTimer.Interval = 100; // 计时器间隔为 100 毫秒
-            sKeyDownTimer.AutoReset = true;
-            sKeyDownTimer.Elapsed += SKeyDownTimer_Elapsed;
-        }
-
-        private void SKeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            if (isSKeyPressed)
-            {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    canvas.Children.Add(role.Shoot());
-                });
-            }
-            else
-            {
-                sKeyDownTimer.Stop();
-              
-            }
-        }
-
-      
-        private void CompositionTarget_Rendering(object sender, EventArgs e)
-        {
-            //throw new NotImplementedException();
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.Key)
-            {
-                case Key.S:
-                    if (role != null)
-                    {
-                        isSKeyPressed = false;
-                        sKeyDownTimer.Stop();
-                        canvas.Children.Add(role.Shoot());
-                    }
-                    break;
+            if (e.Key == Key.S) {
+                isSKeyPressed = false;
             }
-            e.Handled = true;
+            if (e.Key == Key.Left) {
+                isLeftKeyPressed = false;
+            }
+            if (e.Key == Key.Right)
+            {
+                isRightKeyPressed = false;
+            }
+            if (e.Key == Key.Up)
+            {
+                isUpKeyPressed = false;
+            }
+            if (e.Key == Key.Down)
+            {
+                isDownKeyPressed = false;
+            }
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            HandleKeyDown(e);
-            e.Handled = true;
-        }
-
-        private async void HandleKeyDown(KeyEventArgs e) {
-
-            Console.WriteLine(e.Key.ToString());
-           await Task.Run(() =>
+            if (e.Key == Key.Left)
             {
-                switch (e.Key)
-                {
-                    case Key.Left:
-                        left = left - 10;
-                        if (left <= 0)
-                        {
-                            left = 0;
-                        }
-                        else if (left >= canvas.ActualWidth - 30)
-                        {
-
-                            left = canvas.ActualWidth - 30;
-                        }
-                        
-                        break;
-                    case Key.Right:
-                        left = left + 10;
-                        if (left <= 0)
-                        {
-                            left = 0;
-                        }
-                        else if (left >= canvas.ActualWidth - 30)
-                        {
-                            left = canvas.ActualWidth - 30;
-                        }
-                        break;
-                    case Key.Up:
-
-                        top = top - 10;
-                        if (top <= 0)
-                        {
-                            top = 0;
-                        }
-                        else if (top >= canvas.ActualHeight - 30)
-                        {
-                            top = canvas.ActualHeight - 30;
-                        }
-                        break;
-                    case Key.Down:
-                        top = top + 10;
-                        if (top <= 0)
-                        {
-                            top = 0;
-                        }
-                        else if (top >= canvas.ActualHeight - 30)
-                        {
-                            top = canvas.ActualHeight - 30;
-                        }
-                        break;
-                    case Key.S:
-
-                        isSKeyPressed = true;
-                        sKeyDownTimer.Start();
-                       
-                        break;
-                }
-            });
-            Canvas.SetLeft(role, left);
-            Canvas.SetTop(role, top);
-        }
-
-      
-        // Define the method you want to trigger
-        private void Shoot(object sender, ElapsedEventArgs e)
-        {
-            // Do something
-
+                isLeftKeyPressed = true;
+            }
+            if (e.Key == Key.Right)
+            {
+                isRightKeyPressed = true; 
+            }
+            if (e.Key == Key.Up)
+            {
+                isUpKeyPressed = true;
+            }
+            if (e.Key == Key.Down)
+            {
+                isDownKeyPressed = true;
+            }
+            if (e.Key == Key.S)
+            {
+                isSKeyPressed = true;
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            //bool isuse =  IsFileInUse(new FileInfo(@"E:\智众工作文档\MMC 院内检验数据接口文档（3.6）(1).pdf"));
+            // IsRegex();
+            KeyDownTimer = new System.Timers.Timer();
+            KeyDownTimer.Interval = 50; // 计时器间隔为 100 毫秒
+            KeyDownTimer.AutoReset = true;
+            KeyDownTimer.Elapsed += KeyDownTimer_Elapsed; ;
+        }
+
+        private void KeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (isLeftKeyPressed)
+            {
+                left = left - 10;
+                if (left <= 0)
+                {
+                    left = 0;
+                }
+                else if (left >= canvas.ActualWidth - 30)
+                {
+                    left = canvas.ActualWidth - 30;
+                }
+            }
+            if (isRightKeyPressed)
+            {
+                isRightKeyPressed = true;
+                left = left + 10;
+                if (left <= 0)
+                {
+                    left = 0;
+                }
+                else if (left >= canvas.ActualWidth - 30)
+                {
+                    left = canvas.ActualWidth - 30;
+                }
+            }
+            if (isUpKeyPressed)
+            {
+                isUpKeyPressed = true;
+                top = top - 10;
+                if (top <= 0)
+                {
+                    top = 0;
+                }
+                else if (top >= canvas.ActualHeight - 30)
+                {
+                    top = canvas.ActualHeight - 30;
+                }
+            }
+            if (isDownKeyPressed)
+            {
+                isDownKeyPressed = true;
+                top = top + 10;
+                if (top <= 0)
+                {
+                    top = 0;
+                }
+                else if (top >= canvas.ActualHeight - 30)
+                {
+                    top = canvas.ActualHeight - 30;
+                }
+            }
+            if (isSKeyPressed)
+            {
+              
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    if (role != null) { 
+                        canvas.Children.Add(role.Shoot());
+                    }
+                });
+            }
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            {
+                if (role != null) {
+                    Canvas.SetLeft(role, left);
+                    Canvas.SetTop(role, top);
+                }
+            });
+           
+        }
+
+
+        // Define a method to check if a file is in use
+        private  bool IsFileInUse(FileInfo file)
+        {
+            try
+            {
+                using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    // The file is not currently in use
+                    return false;
+                }
+            }
+            catch (IOException)
+            {
+                // The file is currently in use
+                return true;
+            }
+        }
+
+        private void IsRegex() {
+            string pattern = @"\.(jpe?g|bmp|png)$";
+            string fileName = "example_image.PNG";
+            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            if (regex.IsMatch(fileName))
+            {
+                Console.WriteLine("Match found!");
+            }
+            else
+            {
+                Console.WriteLine("No match found.");
+            }
         }
 
 
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
-            //new TaskFactory().StartNew(ControlMove)
-            //canvas = new Canvas();
-            Plan plan = new Plan();
-            plans.Add(plan);
-            canvas.Children.Add(plan);
-            plan.Show(canvas.ActualWidth,canvas.ActualHeight);
+            //Plan plan = new Plan();
+            //plans.Add(plan);
+            //canvas.Children.Add(plan);
+            //plan.Show(canvas.ActualWidth,canvas.ActualHeight);
 
             role = new Role();
             canvas.Children.Add(role);
@@ -189,8 +227,9 @@ namespace Firmament
             //让角色位于中间
             Canvas.SetLeft(role, left);
             Canvas.SetTop(role, top);
+            //AdjustAll();
 
-            AdjustAll();
+            KeyDownTimer.Start();
         }
 
         private void AdjustPositatiom(Plan plan)
@@ -212,8 +251,6 @@ namespace Firmament
                 MessageBox.Show("飞机相撞,game over");
             }
         }
-
-
 
         private void AdjustAll()
         {
