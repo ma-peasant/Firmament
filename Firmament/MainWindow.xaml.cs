@@ -29,7 +29,11 @@ namespace Firmament
     {
         //敌机集合
         List<Plan> plans = new List<Plan>();
-   
+
+        //子弹集合
+        List<Bullet> bullets = new List<Bullet>();
+
+
         Role role = null;
         double left = 0;
         double top = 0;
@@ -41,7 +45,10 @@ namespace Firmament
         bool isDownKeyPressed = false;
         
         //开一个定时器 ，专门处理按钮点击
-        System.Timers.Timer KeyDownTimer = new System.Timers.Timer();
+        System.Timers.Timer KeyDownTimer;
+
+        //开一个定时器 ，生产敌机
+        System.Timers.Timer ArmyProductTimer;
         public MainWindow()
         {
             InitializeComponent();
@@ -71,7 +78,6 @@ namespace Firmament
                 isDownKeyPressed = false;
             }
         }
-
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Left)
@@ -98,14 +104,45 @@ namespace Firmament
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //bool isuse =  IsFileInUse(new FileInfo(@"E:\智众工作文档\MMC 院内检验数据接口文档（3.6）(1).pdf"));
-            // IsRegex();
+            InitKeyDownTimer();
+            InitArmyProductTimer();
+        }
+        #region 定时器初始化
+        private void InitKeyDownTimer() {
             KeyDownTimer = new System.Timers.Timer();
             KeyDownTimer.Interval = 50; // 计时器间隔为 100 毫秒
             KeyDownTimer.AutoReset = true;
-            KeyDownTimer.Elapsed += KeyDownTimer_Elapsed; ;
+            KeyDownTimer.Elapsed += KeyDownTimer_Elapsed;
         }
 
+        private void InitArmyProductTimer() {
+            ArmyProductTimer = new System.Timers.Timer();
+            ArmyProductTimer.Interval = 2000; // 计时器间隔为 100 毫秒
+            ArmyProductTimer.AutoReset = true;
+            ArmyProductTimer.Elapsed += ArmyProductTimer_Elapsed;
+        }
+        /// <summary>
+        /// 生产敌机
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ArmyProductTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            {
+                Plan plan = new Plan();
+                plans.Add(plan);
+                canvas.Children.Add(plan);
+                plan.Show(canvas.ActualWidth, canvas.ActualHeight);
+                plans.Add(plan);
+            });
+        }
+
+        /// <summary>
+        /// 按键处理程序
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void KeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (isLeftKeyPressed)
@@ -161,65 +198,32 @@ namespace Firmament
             }
             if (isSKeyPressed)
             {
-              
                 Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
-                    if (role != null) { 
+                    if (role != null)
+                    {
+
                         canvas.Children.Add(role.Shoot());
                     }
                 });
             }
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
-                if (role != null) {
+                if (role != null)
+                {
                     Canvas.SetLeft(role, left);
                     Canvas.SetTop(role, top);
                 }
             });
-           
-        }
 
-
-        // Define a method to check if a file is in use
-        private  bool IsFileInUse(FileInfo file)
-        {
-            try
-            {
-                using (FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.None))
-                {
-                    // The file is not currently in use
-                    return false;
-                }
-            }
-            catch (IOException)
-            {
-                // The file is currently in use
-                return true;
-            }
         }
+        #endregion
 
-        private void IsRegex() {
-            string pattern = @"\.(jpe?g|bmp|png)$";
-            string fileName = "example_image.PNG";
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            if (regex.IsMatch(fileName))
-            {
-                Console.WriteLine("Match found!");
-            }
-            else
-            {
-                Console.WriteLine("No match found.");
-            }
-        }
 
 
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
-            //Plan plan = new Plan();
-            //plans.Add(plan);
-            //canvas.Children.Add(plan);
-            //plan.Show(canvas.ActualWidth,canvas.ActualHeight);
-
+           
             role = new Role();
             canvas.Children.Add(role);
             left = canvas.ActualWidth / 2;
@@ -227,9 +231,10 @@ namespace Firmament
             //让角色位于中间
             Canvas.SetLeft(role, left);
             Canvas.SetTop(role, top);
-            //AdjustAll();
+            AdjustAll();
 
             KeyDownTimer.Start();
+            ArmyProductTimer.Start();
         }
 
         private void AdjustPositatiom(Plan plan)
@@ -250,7 +255,16 @@ namespace Firmament
                 canvas.Children.Remove(role);
                 MessageBox.Show("飞机相撞,game over");
             }
+
+            if (plan.IsOver(bullets)) {
+                canvas.Children.Remove(plan);
+            }
+
         }
+
+
+       
+
 
         private void AdjustAll()
         {

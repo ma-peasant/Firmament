@@ -35,7 +35,7 @@ namespace Firmament.Module
             DoubleAnimation daY = new DoubleAnimation();
             daY.From = Canvas.GetTop(role);
             daY.To = 0;
-            double second = Canvas.GetTop(role) / 100;
+            double second = 1;
 
             daY.Duration = new System.Windows.Duration(TimeSpan.FromSeconds(second));
             rectangle.BeginAnimation(Canvas.TopProperty, daY);

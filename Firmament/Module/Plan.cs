@@ -23,11 +23,11 @@ namespace Firmament.Module
             DoubleAnimation daX = new DoubleAnimation();
             DoubleAnimation daY = new DoubleAnimation();
             //指定起点
-            daX.From = 0;
+            daX.From = new Random().Next(0,400);
             daY.From = 0;
             //指定终点
             //Random r = new Random();
-            daX.To = x;
+            daX.To = new Random().Next(0,400);
             daY.To = y;
             //指定时长
             Duration duration = new Duration(TimeSpan.FromSeconds(10));
@@ -42,6 +42,19 @@ namespace Firmament.Module
         public Rect getRec() {
             return new Rect(Canvas.GetLeft(this),Canvas.GetTop(this),30,30);
         
+        }
+
+        public bool IsOver(List<Bullet> bullets)
+        {
+            for (int i = 0; i < bullets.Count; i++)
+            {
+                bool isCollision = bullets[i].getRec().IntersectsWith(this.getRec());
+                if (isCollision)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
 
