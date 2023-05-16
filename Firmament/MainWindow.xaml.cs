@@ -28,7 +28,7 @@ namespace Firmament
     public partial class MainWindow : Window
     {
         //敌机集合
-        List<Plan> plans = new List<Plan>();
+        List<Plan> ArmyPlans = new List<Plan>();
 
         //子弹集合
         List<Bullet> bullets = new List<Bullet>();
@@ -131,10 +131,10 @@ namespace Firmament
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
                 Plan plan = new Plan();
-                plans.Add(plan);
+                ArmyPlans.Add(plan);
                 canvas.Children.Add(plan);
                 plan.Show(canvas.ActualWidth, canvas.ActualHeight);
-                plans.Add(plan);
+                ArmyPlans.Add(plan);
             });
         }
 
@@ -223,18 +223,19 @@ namespace Firmament
 
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
-           
+            //1、创建角色
             role = new Role();
             canvas.Children.Add(role);
             left = canvas.ActualWidth / 2;
             top = canvas.ActualHeight - 50;
-            //让角色位于中间
+            //2、让角色位于中间
             Canvas.SetLeft(role, left);
             Canvas.SetTop(role, top);
+            //3、启动定时器
+            KeyDownTimer.Start();     //按键功能扫描
+            ArmyProductTimer.Start(); //生产敌机扫描
+            //4、检测碰撞
             AdjustAll();
-
-            KeyDownTimer.Start();
-            ArmyProductTimer.Start();
         }
 
         private void AdjustPositatiom(Plan plan)
@@ -259,12 +260,7 @@ namespace Firmament
             if (plan.IsOver(bullets)) {
                 canvas.Children.Remove(plan);
             }
-
         }
-
-
-       
-
 
         private void AdjustAll()
         {
@@ -278,11 +274,11 @@ namespace Firmament
         {
             Task.Run(() =>
             {
-                for (int i = 0; i < plans.Count; i++)
+                for (int i = 0; i < ArmyPlans.Count; i++)
                 {
                     Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                     {
-                        AdjustPositatiom(plans[i]);
+                        AdjustPositatiom(ArmyPlans[i]);
                     });
                 }
             });
