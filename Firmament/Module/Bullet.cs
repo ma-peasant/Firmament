@@ -36,14 +36,12 @@ namespace Firmament.Module
             daY.From = Canvas.GetTop(role);
             daY.To = 0;
             double second = 1;
-
             daY.Duration = new System.Windows.Duration(TimeSpan.FromSeconds(second));
             rectangle.BeginAnimation(Canvas.TopProperty, daY);
         }
         public Rect getRec()
         {
             return new Rect(Canvas.GetLeft(rectangle), Canvas.GetTop(rectangle), 2, 5);
-
         }
     }
 }

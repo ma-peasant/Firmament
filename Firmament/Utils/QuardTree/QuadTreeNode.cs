@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Shapes;
 
 namespace Firmament.Utils.QuardTree
 {
@@ -10,18 +13,19 @@ namespace Firmament.Utils.QuardTree
     public class QuadTreeNode
     {
         //自身的边界
-        public BoundingBox Bounds { get; set; }
+        public Rect Bounds { get; set; }
+
 
         //自身存在的矩形个数
-        public List<BoundingBox> Objects { get; set; }
+        public List<Rectangle> Objects { get; set; }
 
         //子节点分区
         public QuadTreeNode[] Children { get; set; }
 
-        public QuadTreeNode(BoundingBox bounds)
+        public QuadTreeNode(Rect bounds)
         {
             Bounds = bounds;
-            Objects = new List<BoundingBox>();
+            Objects = new List<Rectangle>();
             Children = new QuadTreeNode[4];
         }
 

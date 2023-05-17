@@ -1,4 +1,6 @@
 ﻿using Firmament.Module;
+using Firmament.Utils;
+using Firmament.Utils.QuardTree;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -223,19 +225,22 @@ namespace Firmament
 
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
-            //1、创建角色
-            role = new Role();
-            canvas.Children.Add(role);
-            left = canvas.ActualWidth / 2;
-            top = canvas.ActualHeight - 50;
-            //2、让角色位于中间
-            Canvas.SetLeft(role, left);
-            Canvas.SetTop(role, top);
-            //3、启动定时器
-            KeyDownTimer.Start();     //按键功能扫描
-            ArmyProductTimer.Start(); //生产敌机扫描
-            //4、检测碰撞
-            AdjustAll();
+            QuardTest();
+            //FunctionTest();
+
+            ////1、创建角色
+            //role = new Role();
+            //canvas.Children.Add(role);
+            //left = canvas.ActualWidth / 2;
+            //top = canvas.ActualHeight - 50;
+            ////2、让角色位于中间
+            //Canvas.SetLeft(role, left);
+            //Canvas.SetTop(role, top);
+            ////3、启动定时器
+            //KeyDownTimer.Start();     //按键功能扫描
+            //ArmyProductTimer.Start(); //生产敌机扫描
+            ////4、检测碰撞
+            //AdjustAll();
         }
 
         private void AdjustPositatiom(Plan plan)
@@ -283,6 +288,134 @@ namespace Firmament
                 }
             });
           
+        }
+
+        private void FunctionTest() {
+            Rect rect = new Rect(0, 0, 50, 50);
+            Rectangle rectangle = new Rectangle();
+            rectangle.Width = 50;
+            rectangle.Height = 50;
+            rectangle.Fill = new SolidColorBrush(Colors.Green);
+            Canvas.SetLeft(rectangle, rect.X);
+            Canvas.SetTop(rectangle, rect.Y);
+            canvas.Children.Add(rectangle);
+
+            Rect rect2 = new Rect(60, 60, 10, 10);
+            Rectangle rectangle2 = new Rectangle();
+            rectangle2.Width = 10;
+            rectangle2.Height = 10;
+            rectangle2.Fill = new SolidColorBrush(Colors.Red);
+            Canvas.SetLeft(rectangle2, rect2.X);
+            Canvas.SetTop(rectangle2, rect2.Y);
+            canvas.Children.Add(rectangle2);
+
+            if (CheckCollision.IsIntersecting(rect,rect2)) {
+                MessageBox.Show("相交");
+            }
+
+
+
+
+        }
+
+
+        private Random random = new Random();
+        //四叉树算法测试
+        private void QuardTest() {
+            count = 0;
+            canvas.Children.Clear();
+            QuadTree quard = new QuadTree(0,0,this.canvas.ActualWidth,this.canvas.ActualHeight);
+            for (int i = 0; i < 5000; i++) {
+                double x = random.NextDouble() * 10 * this.canvas.ActualWidth /10;
+                double y = random.NextDouble() * 10 * this.canvas.ActualHeight /10;
+                Rectangle rectangle = new Rectangle();
+                rectangle.Width = 10;
+                rectangle.Height = 10;
+                rectangle.Fill = new SolidColorBrush(Colors.Green);
+                Canvas.SetLeft(rectangle,x);
+                Canvas.SetTop(rectangle, y);
+                canvas.Children.Add(rectangle);
+                quard.Insert(rectangle);
+            }
+
+            AddLine(quard.root);
+            new TaskFactory().StartNew(() =>
+            {
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    HitCheck(quard, quard.root);
+                });
+               
+            });
+          
+        }
+
+        int count = 0;
+        private void HitCheck(QuadTree quard , QuadTreeNode root) {
+
+            if (root != null)
+            {
+                if (root.Objects.Count > 0){
+                    // 进行碰撞检测
+                    foreach (Rectangle obj in root.Objects)
+                    {
+                        // 查询与当前对象可能发生碰撞的其他对象
+                        List<Rectangle> potentialCollisions = quard.Query(obj);
+                        //要排除自身
+                        if (potentialCollisions.Contains(obj)) { 
+                            potentialCollisions.Remove(obj);
+                        }
+                        if (potentialCollisions.Count > 0)
+                        {
+                            // 对查询到的对象进行碰撞检测
+                            foreach (var collisionObj in potentialCollisions)
+                            {
+                                if (IsColliding(obj, collisionObj))
+                                {
+                                    HandleCollision(obj, collisionObj);
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                foreach (QuadTreeNode node2 in root.Children)
+                {
+                    HitCheck(quard,node2);
+                }
+            }
+        }
+
+        private void HandleCollision(Rectangle obj, Rectangle collisionObj) {
+            obj.Fill = new SolidColorBrush(Colors.Red);
+            collisionObj.Fill = new SolidColorBrush(Colors.Red);
+        }
+
+        private bool IsColliding(Rectangle obj , Rectangle obj2) {
+            Rect rectObj =  new Rect(Canvas.GetLeft(obj), Canvas.GetTop(obj), obj.Width, obj.Height);
+            Rect rectObj2 = new Rect(Canvas.GetLeft(obj2), Canvas.GetTop(obj2), obj2.Width, obj2.Height);
+            return rectObj.IntersectsWith(rectObj2);
+        }
+
+        //遍历四叉树，如果节点的Bound不为空，就绘制
+        private void AddLine(QuadTreeNode node) {
+            if (node != null) {
+               Rectangle rectangle =  new Rectangle();
+                rectangle.Width = node.Bounds.Width;
+                rectangle.Height = node.Bounds.Height;
+                Canvas.SetLeft(rectangle, node.Bounds.X);
+                Canvas.SetTop(rectangle, node.Bounds.Y);
+                rectangle.Stroke = new SolidColorBrush(Colors.Yellow);
+                rectangle.StrokeThickness = 1;
+                rectangle.Fill = new SolidColorBrush(Colors.Transparent);
+                canvas.Children.Add(rectangle);
+
+                foreach (QuadTreeNode node2 in node.Children)
+                {
+                    AddLine(node2);
+                }
+            }
         }
     }
 }

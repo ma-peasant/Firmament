@@ -58,6 +58,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Utils\CheckCollision.cs" />
+    <Compile Include="Utils\Common.cs" />
+    <Compile Include="Utils\QuardTree\QuadTree.cs" />
+    <Compile Include="Utils\QuardTree\QuadTreeNode.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
