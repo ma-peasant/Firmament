@@ -141,6 +141,41 @@ namespace Firmament.Utils
             
         }
 
-       
+        /// <summary>
+        /// 删除节点
+        /// </summary>
+        public void delete(Rectangle rec) {
+            deleteNode(root, rec);
+        }
+
+        public void deleteNode(QuadTreeNode node, Rectangle rec)
+        {
+            foreach (Rectangle rect in node.Objects)
+            {
+                if (rec == rect)
+                {
+                    root.Objects.Remove(rect);
+                    return;
+                }
+            }
+            foreach (QuadTreeNode qrNode in node.Children) {
+
+                if (qrNode != null) {
+                    if (qrNode.Objects.Count == 0)
+                    {
+                        qrNode.Children = null;
+                    }
+                    else {
+                        deleteNode(qrNode, rec);
+                    }
+                   
+                }
+              
+            }
+           
+        }
+
+
+
     }
 }

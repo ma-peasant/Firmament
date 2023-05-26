@@ -320,11 +320,12 @@ namespace Firmament
 
 
         private Random random = new Random();
+        private QuadTree quadTree;
         //四叉树算法测试
         private void QuardTest() {
             count = 0;
             canvas.Children.Clear();
-            QuadTree quard = new QuadTree(0,0,this.canvas.ActualWidth,this.canvas.ActualHeight);
+            quadTree = new QuadTree(0,0,this.canvas.ActualWidth,this.canvas.ActualHeight);
             for (int i = 0; i < 50; i++) {
                 double x = random.NextDouble() * 10 * this.canvas.ActualWidth /10;
                 double y = random.NextDouble() * 10 * this.canvas.ActualHeight /10;
@@ -334,41 +335,46 @@ namespace Firmament
                 rectangle.Fill = new SolidColorBrush(Colors.Green);
                 Canvas.SetLeft(rectangle,x);
                 Canvas.SetTop(rectangle, y);
-                //ChangeLocation(rectangle);
-                RectangleAnimation(rectangle);
+              
                 canvas.Children.Add(rectangle);
-                quard.Insert(rectangle);
+                quadTree.Insert(rectangle);
             }
-            ChangeCheck(quard);
+            foreach (Rectangle rectangle1 in canvas.Children) {
+                ChangeLocation(rectangle1);
+            }
+            //ChangeCheck(quadTree);
         }
 
-        public void ChangeLocation(Rectangle rec) { 
+        public void ChangeLocation(Rectangle rec) {
+            //DispatcherTimer 运行在UI线程
             DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(100); // 更新间隔，可以根据需要调整
+            timer.Interval = new TimeSpan(16); // 更新间隔，可以根据需要调整
             timer.Tick += (sender,e)=> {
                 double canvasWidth = canvas.ActualWidth; // 画布宽度
                 double canvasHeight = canvas.ActualHeight; // 画布高度
 
                 // 计算新的位置
-                double newX = Canvas.GetLeft(rec) + random.NextDouble() * 20 - 10; // X 轴随机偏移量
-                double newY = Canvas.GetTop(rec) + random.NextDouble() * 20 - 10; // Y 轴随机偏移量
+                double newX =0 , newY = 0;
+                newX = Canvas.GetLeft(rec) + random.NextDouble() * 20 - 10; // X 轴随机偏移量
+                newY = Canvas.GetTop(rec) + random.NextDouble() * 20 - 10; // Y 轴随机偏移量
 
                 // 确保新的位置在规定范围内
                 newX = Math.Max(0, Math.Min(canvasWidth - rec.Width, newX));
                 newY = Math.Max(0, Math.Min(canvasHeight - rec.Height, newY));
-
                 // 更新 Rectangle 的位置
                 Canvas.SetLeft(rec, newX);
                 Canvas.SetTop(rec, newY);
+                HitCheck(quadTree, quadTree.root);
             };
             timer.Start();
         }
 
         public void ChangeCheck(QuadTree quard)
         {
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(16); // 更新间隔，可以根据需要调整
-            timer.Tick += (sender, e) => {
+            //DispatcherTimer是运行在UI线程上的
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 16; // 更新间隔，可以根据需要调整
+            timer.Elapsed += (sender, e) => {
                 //new TaskFactory().StartNew(() =>
                 //{
                 //    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
@@ -377,58 +383,18 @@ namespace Firmament
                 //    });
 
                 //});
-              
-                new TaskFactory().StartNew(() =>
-                {
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                    {
-                        HitCheck(quard, quard.root);
-                    });
 
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    HitCheck(quard, quard.root);
                 });
+              
             };
             timer.Start();
         }
 
-        public void RectangleAnimation(Rectangle rect) {
-            DoubleAnimation daY = new DoubleAnimation();
-            daY.From = Canvas.GetTop(rect);
-            daY.To = daY.From + 5;
-            double second = 1;
-            daY.RepeatBehavior = RepeatBehavior.Forever;
-            daY.FillBehavior = FillBehavior.HoldEnd;
-            daY.Duration = new System.Windows.Duration(TimeSpan.FromSeconds(second));
-            daY.Completed += DaY_Completed;
-
-            DoubleAnimation daX = new DoubleAnimation();
-            daX.From = Canvas.GetLeft(rect);
-            daX.To = daX.From + 5;
-            daX.RepeatBehavior = RepeatBehavior.Forever;
-            daX.FillBehavior = FillBehavior.HoldEnd;
-            daX.Duration = new System.Windows.Duration(TimeSpan.FromSeconds(second));
-            daX.Completed += DaX_Completed;
-            rect.BeginAnimation(Canvas.TopProperty, daY);
-            rect.BeginAnimation(Canvas.LeftProperty, daX);
-
-        }
-
-        private void DaX_Completed(object sender, EventArgs e)
-        {
-            DoubleAnimation completedAnimation = (DoubleAnimation)sender;
-            double lastToValue = (double)completedAnimation.To;
-            completedAnimation.From = lastToValue;
-        }
-
-        private void DaY_Completed(object sender, EventArgs e)
-        {
-            DoubleAnimation completedAnimation = (DoubleAnimation)sender;
-            double lastToValue = (double)completedAnimation.To;
-            completedAnimation.From = lastToValue;
-        }
-
         int count = 0;
         private void HitCheck(QuadTree quard , QuadTreeNode root) {
-
             if (root != null)
             {
                 if (root.Objects.Count > 0){
@@ -454,7 +420,7 @@ namespace Firmament
                                     break;
                                 }
                             }
-                            if (!isHit) { 
+                            if (!isHit) {
                                 obj.Fill = new SolidColorBrush(Colors.Green);
                             }
 
@@ -473,6 +439,10 @@ namespace Firmament
         private void HandleCollision(Rectangle obj, Rectangle collisionObj) {
             obj.Fill = new SolidColorBrush(Colors.Red);
             collisionObj.Fill = new SolidColorBrush(Colors.Red);
+            this.canvas.Children.Remove(obj);
+            this.canvas.Children.Remove(collisionObj);
+            this.quadTree.delete(obj);
+            this.quadTree.delete(collisionObj);
         }
 
         private bool IsColliding(Rectangle obj , Rectangle obj2) {
