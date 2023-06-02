@@ -28,10 +28,10 @@ namespace Firmament
         //将球分组创建Task任务
         List<List<Ball>> collections = new List<List<Ball>>();
         //最大任务数，和小球的分类数保持一致
-        private int taskCount = 800;
+        private int taskCount = 500;
         List<Task> tasks = new List<Task>();
         private int interval = 100;    //时间间隔 ms
-        private const int BallCount = 2000;   // 产生的小球的个数
+        private const int BallCount = 1000;   // 产生的小球的个数
         private Random random = new Random();
         #region 页码基础定义
         /**舞台宽度/2 */
@@ -364,31 +364,31 @@ namespace Firmament
         /**碰撞检测 */
         private void checkCollision()
         {
-            //int count = 0;
-            //for (int i = 0; i < this.ballList.Count; i++)
-            //{
-            //    Ball ballA = this.ballList[i];
-            //    List<Ball> list = this.gridList[ballA.row][ballA.col];
-            //    for (int j = 0; j < list.Count; j++)
-            //    {
-            //        //count++;
-            //        Ball ballB = list[j];
-            //        if (ballA != ballB)
-            //        {
-            //            if (this.rectRect(ballA, ballB))
-            //            {
-            //                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //                {
-            //                    ballA.Hit_State = true;
-            //                    ballB.Hit_State = true;
-            //                    //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
-            //                    //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
-            //                });
+            int count = 0;
+            for (int i = 0; i < this.ballList.Count; i++)
+            {
+                Ball ballA = this.ballList[i];
+                List<Ball> list = this.gridList[ballA.row][ballA.col];
+                for (int j = 0; j < list.Count; j++)
+                {
+                    //count++;
+                    Ball ballB = list[j];
+                    if (ballA != ballB)
+                    {
+                        if (this.rectRect(ballA, ballB))
+                        {
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                            {
+                                ballA.Hit_State = true;
+                                ballB.Hit_State = true;
+                                //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
+                                //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
+                            });
 
-            //            }
-            //        }
-            //    }
-            //}
+                        }
+                    }
+                }
+            }
 
             Parallel.ForEach(ballList, ball =>
             {

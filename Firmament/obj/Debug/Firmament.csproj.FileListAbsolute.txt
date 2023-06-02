@@ -17,3 +17,5 @@ E:\MyWPFProject\Firmament\Firmament\obj\Debug\QuardTreeTestPage.g.cs
 E:\MyWPFProject\Firmament\Firmament\obj\Debug\EasyQuardTreeTestPage.baml
 E:\MyWPFProject\Firmament\Firmament\obj\Debug\QuardTreeTestPage.baml
 E:\MyWPFProject\Firmament\Firmament\obj\Debug\Firmament.csproj.AssemblyReference.cache
+E:\MyWPFProject\Firmament\Firmament\obj\Debug\GamePage.g.cs
+E:\MyWPFProject\Firmament\Firmament\obj\Debug\GamePage.baml

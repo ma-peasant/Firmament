@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Firmament.Module;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,19 +15,20 @@ namespace Firmament.Utils.QuardTree
     {
         //自身的边界
         public Rect Bounds { get; set; }
-
+        public bool IsLeaf { get; set; }   //叶子节点，  没有子节点的节点称为叶子节点
 
         //自身存在的矩形个数
-        public List<Rectangle> Objects { get; set; }
+        public List<Ball> Objects { get; set; }
 
         //子节点分区
-        public QuadTreeNode[] Children { get; set; }
+        public List<QuadTreeNode> Children { get; set; }
 
         public QuadTreeNode(Rect bounds)
         {
             Bounds = bounds;
-            Objects = new List<Rectangle>();
-            Children = new QuadTreeNode[4];
+            Objects = new List<Ball>();
+            Children = new List<QuadTreeNode>();
+            IsLeaf = false;
         }
 
        

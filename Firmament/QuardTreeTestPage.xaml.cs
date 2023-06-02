@@ -1,5 +1,4 @@
 ﻿using Firmament.Module;
-using Firmament.Utils;
 using Firmament.Utils.QuardTree;
 using System;
 using System.Collections.Generic;
@@ -26,448 +25,238 @@ namespace Firmament
     /// </summary>
     public partial class QuardTreeTestPage : Page
     {
-        //敌机集合
-        List<Plan> ArmyPlans = new List<Plan>();
-
-        //子弹集合
-        List<Bullet> bullets = new List<Bullet>();
-
-
-        Role role = null;
-        double left = 0;
-        double top = 0;
-
-        bool isSKeyPressed = false;
-        bool isLeftKeyPressed = false;
-        bool isRightKeyPressed = false;
-        bool isUpKeyPressed = false;
-        bool isDownKeyPressed = false;
-
-        //开一个定时器 ，专门处理按钮点击
-        System.Timers.Timer KeyDownTimer;
-
-        //开一个定时器 ，生产敌机
-        System.Timers.Timer ArmyProductTimer;
+        /**小球列表 */
+        private List<Ball> ballList;
+        private int interval = 100;
+        QuadTree rootTree;
+        private const int BallCount = 1000;
+        Random random = new Random();
+        //界面边缘
+        private double maxWidth;
+        private double maxHeight;
         public QuardTreeTestPage()
         {
             InitializeComponent();
             this.Loaded += QuardTreeTestPage_Loaded; ;
-            this.KeyDown += MainWindow_KeyDown;
-            this.KeyUp += MainWindow_KeyUp;
         }
 
         private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
         {
-            InitKeyDownTimer();
-            InitArmyProductTimer();
+            this.maxWidth = this.canvas.ActualWidth - 10;
+            this.maxHeight = this.canvas.ActualHeight - 10;
+            ballList = new List<Ball>();
+            rootTree =  new QuadTree(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight);
         }
-
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.S)
-            {
-                isSKeyPressed = false;
-            }
-            if (e.Key == Key.Left)
-            {
-                isLeftKeyPressed = false;
-            }
-            if (e.Key == Key.Right)
-            {
-                isRightKeyPressed = false;
-            }
-            if (e.Key == Key.Up)
-            {
-                isUpKeyPressed = false;
-            }
-            if (e.Key == Key.Down)
-            {
-                isDownKeyPressed = false;
-            }
-        }
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Left)
-            {
-                isLeftKeyPressed = true;
-            }
-            if (e.Key == Key.Right)
-            {
-                isRightKeyPressed = true;
-            }
-            if (e.Key == Key.Up)
-            {
-                isUpKeyPressed = true;
-            }
-            if (e.Key == Key.Down)
-            {
-                isDownKeyPressed = true;
-            }
-            if (e.Key == Key.S)
-            {
-                isSKeyPressed = true;
-            }
-        }
-
-        #region 定时器初始化
-        private void InitKeyDownTimer()
-        {
-            KeyDownTimer = new System.Timers.Timer();
-            KeyDownTimer.Interval = 50; // 计时器间隔为 100 毫秒
-            KeyDownTimer.AutoReset = true;
-            KeyDownTimer.Elapsed += KeyDownTimer_Elapsed;
-        }
-
-        private void InitArmyProductTimer()
-        {
-            ArmyProductTimer = new System.Timers.Timer();
-            ArmyProductTimer.Interval = 2000; // 计时器间隔为 100 毫秒
-            ArmyProductTimer.AutoReset = true;
-            ArmyProductTimer.Elapsed += ArmyProductTimer_Elapsed;
-        }
-        /// <summary>
-        /// 生产敌机
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ArmyProductTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            {
-                Plan plan = new Plan();
-                ArmyPlans.Add(plan);
-                canvas.Children.Add(plan);
-                plan.Show(canvas.ActualWidth, canvas.ActualHeight);
-                ArmyPlans.Add(plan);
-            });
-        }
-
-        /// <summary>
-        /// 按键处理程序
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void KeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            if (isLeftKeyPressed)
-            {
-                left = left - 10;
-                if (left <= 0)
-                {
-                    left = 0;
-                }
-                else if (left >= canvas.ActualWidth - 30)
-                {
-                    left = canvas.ActualWidth - 30;
-                }
-            }
-            if (isRightKeyPressed)
-            {
-                isRightKeyPressed = true;
-                left = left + 10;
-                if (left <= 0)
-                {
-                    left = 0;
-                }
-                else if (left >= canvas.ActualWidth - 30)
-                {
-                    left = canvas.ActualWidth - 30;
-                }
-            }
-            if (isUpKeyPressed)
-            {
-                isUpKeyPressed = true;
-                top = top - 10;
-                if (top <= 0)
-                {
-                    top = 0;
-                }
-                else if (top >= canvas.ActualHeight - 30)
-                {
-                    top = canvas.ActualHeight - 30;
-                }
-            }
-            if (isDownKeyPressed)
-            {
-                isDownKeyPressed = true;
-                top = top + 10;
-                if (top <= 0)
-                {
-                    top = 0;
-                }
-                else if (top >= canvas.ActualHeight - 30)
-                {
-                    top = canvas.ActualHeight - 30;
-                }
-            }
-            if (isSKeyPressed)
-            {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    if (role != null)
-                    {
-                        canvas.Children.Add(role.Shoot());
-                    }
-                });
-            }
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            {
-                if (role != null)
-                {
-                    Canvas.SetLeft(role, left);
-                    Canvas.SetTop(role, top);
-                }
-            });
-
-        }
-        #endregion
-
-
-
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
-            QuardTest();
-            //FunctionTest();
-
-            ////1、创建角色
-            //role = new Role();
-            //canvas.Children.Add(role);
-            //left = canvas.ActualWidth / 2;
-            //top = canvas.ActualHeight - 50;
-            ////2、让角色位于中间
-            //Canvas.SetLeft(role, left);
-            //Canvas.SetTop(role, top);
-            ////3、启动定时器
-            //KeyDownTimer.Start();     //按键功能扫描
-            //ArmyProductTimer.Start(); //生产敌机扫描
-            ////4、检测碰撞
-            //AdjustAll();
+            //1、生产矩形
+            //创建小球
+            this.createBall();
+            InitUpdateTimer();
         }
 
-        private void AdjustPositatiom(Plan plan)
+        /// <summary>
+        /// 创建小球
+        /// </summary>
+        private void createBall()
         {
-            // 判断两个矩形是否相交
-            bool isCollision = role.getRec().IntersectsWith(plan.getRec());
-
-            // 如果发生碰撞
-            if (isCollision)
+            for (int i = 0; i < BallCount; i++)
             {
-
-                // 设置两个飞机的状态为销毁
-                //role.IsDestroyed = true;
-                //plan.IsDestroyed = true;
-
-                // 在游戏中移除两个飞机
-                canvas.Children.Remove(plan);
-                canvas.Children.Remove(role);
-                MessageBox.Show("飞机相撞,game over");
-            }
-
-            if (plan.IsOver(bullets))
-            {
-                canvas.Children.Remove(plan);
+                //随机位置
+                Ball ball = new Ball();
+                ball.x = random.NextDouble() * this.maxWidth;
+                ball.y = random.NextDouble() * this.maxHeight;
+                Canvas.SetLeft(ball.rectangle, ball.x);
+                Canvas.SetTop(ball.rectangle, ball.y);
+                //随机速度
+                ball.xSpeed = random.NextDouble() * ball.speed;
+                ball.ySpeed = random.NextDouble() * ball.speed;
+                //this.rootTree.Insert(ball);
+                ballList.Add(ball);
+                this.canvas.Children.Add(ball.rectangle);
             }
         }
 
-        private void AdjustAll()
-        {
-            System.Timers.Timer timer = new System.Timers.Timer(1000);
-            timer.Elapsed += Timer_Elapsed;
-            timer.AutoReset = true;
-            timer.Start();
-        }
+    private void InitUpdateTimer()
+    {
+        System.Timers.Timer timer = new System.Timers.Timer();
+        timer.Interval = this.interval; // 更新间隔，可以根据需要调整   大概就是30帧
+        timer.Elapsed += Timer_Tick; ;
+        timer.Start();
+    }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void Timer_Tick(object sender, ElapsedEventArgs e)
         {
-            Task.Run(() =>
+            update();
+        }
+        public void update()
+        {
+            updateBallMove();
+            this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
-                for (int i = 0; i < ArmyPlans.Count; i++)
-                {
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                    {
-                        AdjustPositatiom(ArmyPlans[i]);
-                    });
-                }
+                this.AddLine(rootTree, rootTree.root);
             });
+           
 
+            //this.updateBallGrid();
+            ////检查碰撞
+            //this.checkCollision();
         }
 
-        private void FunctionTest()
+        private void updateBallGrid()
         {
-            Rect rect = new Rect(0, 0, 50, 50);
-            Rectangle rectangle = new Rectangle();
-            rectangle.Width = 50;
-            rectangle.Height = 50;
-            rectangle.Fill = new SolidColorBrush(Colors.Green);
-            Canvas.SetLeft(rectangle, rect.X);
-            Canvas.SetTop(rectangle, rect.Y);
-            canvas.Children.Add(rectangle);
+            ////清理格子
+            //for (int i = 0; i < this.gridRow; i++)
+            //{
+            //    for (int j = 0; j < this.gridCol; j++)
+            //    {
+            //        this.gridList[i][j].Clear();
+            //    }
+            //}
 
-            Rect rect2 = new Rect(60, 60, 10, 10);
-            Rectangle rectangle2 = new Rectangle();
-            rectangle2.Width = 10;
-            rectangle2.Height = 10;
-            rectangle2.Fill = new SolidColorBrush(Colors.Red);
-            Canvas.SetLeft(rectangle2, rect2.X);
-            Canvas.SetTop(rectangle2, rect2.Y);
-            canvas.Children.Add(rectangle2);
+            rootTree.Update();
 
-            if (CheckCollision.IsIntersecting(rect, rect2))
+            //将小球置蓝色，重新计算小球所属行列的格子
+            for (int i = 0; i < this.ballList.Count; i++)
             {
-                MessageBox.Show("相交");
-            }
-
-
-
-
-        }
-
-
-        private Random random = new Random();
-        private QuadTree quadTree;
-        //四叉树算法测试
-        private void QuardTest()
-        {
-            count = 0;
-            canvas.Children.Clear();
-            quadTree = new QuadTree(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight);
-            for (int i = 0; i < 50; i++)
-            {
-                double x = random.NextDouble() * 10 * this.canvas.ActualWidth / 10;
-                double y = random.NextDouble() * 10 * this.canvas.ActualHeight / 10;
-                Rectangle rectangle = new Rectangle();
-                rectangle.Width = 10;
-                rectangle.Height = 10;
-                rectangle.Fill = new SolidColorBrush(Colors.Green);
-                Canvas.SetLeft(rectangle, x);
-                Canvas.SetTop(rectangle, y);
-
-                canvas.Children.Add(rectangle);
-                quadTree.Insert(rectangle);
-            }
-            foreach (Rectangle rectangle1 in canvas.Children)
-            {
-                ChangeLocation(rectangle1);
-            }
-            //ChangeCheck(quadTree);
-        }
-
-        public void ChangeLocation(Rectangle rec)
-        {
-            //DispatcherTimer 运行在UI线程
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = new TimeSpan(16); // 更新间隔，可以根据需要调整
-            timer.Tick += (sender, e) => {
-                double canvasWidth = canvas.ActualWidth; // 画布宽度
-                double canvasHeight = canvas.ActualHeight; // 画布高度
-
-                // 计算新的位置
-                double newX = 0, newY = 0;
-                newX = Canvas.GetLeft(rec) + random.NextDouble() * 20 - 10; // X 轴随机偏移量
-                newY = Canvas.GetTop(rec) + random.NextDouble() * 20 - 10; // Y 轴随机偏移量
-
-                // 确保新的位置在规定范围内
-                newX = Math.Max(0, Math.Min(canvasWidth - rec.Width, newX));
-                newY = Math.Max(0, Math.Min(canvasHeight - rec.Height, newY));
-                // 更新 Rectangle 的位置
-                Canvas.SetLeft(rec, newX);
-                Canvas.SetTop(rec, newY);
-                HitCheck(quadTree, quadTree.root);
-            };
-            timer.Start();
-        }
-
-        public void ChangeCheck(QuadTree quard)
-        {
-            //DispatcherTimer是运行在UI线程上的
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 16; // 更新间隔，可以根据需要调整
-            timer.Elapsed += (sender, e) => {
-                //new TaskFactory().StartNew(() =>
-                //{
-                //    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                //    {
-                //        AddLine(quard,quard.root);
-                //    });
-
-                //});
-
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                Ball ball = this.ballList[i];
+                ////位置x决定的是所在的列，y决定所在的行
+                //int row = (int)Math.Floor(ball.y / this.gridHeight);
+                //int col = (int)Math.Floor(ball.x / this.gridWidth);
+                //ball.row = row;
+                //ball.col = col;
+                //this.gridList[row][col].Add(ball);
+                this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
-                    HitCheck(quard, quard.root);
+                    ball.Hit_State = false;
+                    //ball.rectangle.Fill = new SolidColorBrush(Colors.Blue);
                 });
-
-            };
-            timer.Start();
+            }
         }
 
-        int count = 0;
-        private void HitCheck(QuadTree quard, QuadTreeNode root)
+        private void updateBallMove()
         {
-            if (root != null)
+            int len = this.ballList.Count;
+            Ball ball;
+            for (int i = 0; i < len; i++)
             {
-                if (root.Objects.Count > 0)
+                ball = ballList[i];
+                //移动
+                ball.x += ball.xSpeed;
+                ball.y += ball.ySpeed;
+                //边缘检测 达到边缘后速度取反
+                if (ball.x + ball.Width / 2 > this.maxWidth)
                 {
-                    // 进行碰撞检测
-                    foreach (Rectangle obj in root.Objects)
+                    ball.x = this.maxWidth - ball.Width / 2;
+                    ball.xSpeed = -ball.speed;
+                }
+                else if (ball.x - ball.Width / 2 < 0)
+                {
+                    ball.x = ball.Width / 2;
+                    ball.xSpeed = ball.speed;
+                }
+                if (ball.y + ball.Height / 2 > this.maxHeight)
+                {
+                    ball.y = this.maxHeight - ball.Height / 2;
+                    ball.ySpeed = -ball.speed;
+                }
+                else if (ball.y - ball.Height / 2 < 0)
+                {
+                    ball.y = ball.Height / 2;
+                    ball.ySpeed = ball.speed;
+                }
+                this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Canvas.SetLeft(ball.rectangle, ball.x);
+                    Canvas.SetTop(ball.rectangle, ball.y);
+                });
+            }
+
+            //Parallel.ForEach(ballList, ball =>
+            //{
+            //    //移动
+            //    ball.x += ball.xSpeed;
+            //    ball.y += ball.ySpeed;
+            //    //边缘检测 达到边缘后速度取反
+            //    if (ball.x + ball.Width / 2 > this.maxWidth)
+            //    {
+            //        ball.x = this.maxWidth - ball.Width / 2;
+            //        ball.xSpeed = -ball.speed;
+            //    }
+            //    else if (ball.x - ball.Width / 2 < 0)
+            //    {
+            //        ball.x = ball.Width / 2;
+            //        ball.xSpeed = ball.speed;
+            //    }
+            //    if (ball.y + ball.Height / 2 > this.maxHeight)
+            //    {
+            //        ball.y = this.maxHeight - ball.Height / 2;
+            //        ball.ySpeed = -ball.speed;
+            //    }
+            //    else if (ball.y - ball.Height / 2 < 0)
+            //    {
+            //        ball.y = ball.Height / 2;
+            //        ball.ySpeed = ball.speed;
+            //    }
+            //    this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            //    {
+            //        Canvas.SetLeft(ball.rectangle, ball.x);
+            //        Canvas.SetTop(ball.rectangle, ball.y);
+            //    });
+            //});
+        }
+
+        private void checkCollision()
+        {
+            for (int i = 0; i < this.ballList.Count; i++)
+            {
+                Ball ballA = this.ballList[i];
+                List<Ball> list = this.rootTree.Query(ballA);
+                for (int j = 0; j < list.Count; j++)
+                {
+                    //count++;
+                    Ball ballB = list[j];
+                    if (ballA != ballB)
                     {
-                        // 查询与当前对象可能发生碰撞的其他对象
-                        List<Rectangle> potentialCollisions = quard.Query(obj);
-                        //要排除自身
-                        if (potentialCollisions.Contains(obj))
+                        if (this.rectRect(ballA, ballB))
                         {
-                            potentialCollisions.Remove(obj);
-                        }
-                        if (potentialCollisions.Count > 0)
-                        {
-                            bool isHit = false;
-                            // 对查询到的对象进行碰撞检测
-                            foreach (var collisionObj in potentialCollisions)
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
                             {
-                                if (IsColliding(obj, collisionObj))
-                                {
-                                    isHit = true;
-                                    HandleCollision(obj, collisionObj);
-                                    break;
-                                }
-                            }
-                            if (!isHit)
-                            {
-                                obj.Fill = new SolidColorBrush(Colors.Green);
-                            }
+                                ballA.Hit_State = true;
+                                ballB.Hit_State = true;
+                                //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
+                                //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
+                            });
 
                         }
-
                     }
                 }
-
-                foreach (QuadTreeNode node2 in root.Children)
-                {
-                    HitCheck(quard, node2);
-                }
             }
+            //Console.WriteLine("检查次数:", count);
         }
 
-        private void HandleCollision(Rectangle obj, Rectangle collisionObj)
+        /**
+         * cc.Intersection.rectRect
+         * @param a 
+         * @param b
+         * @returns true碰撞 false未碰撞
+         */
+        private bool rectRect(Ball a, Ball b)
         {
-            obj.Fill = new SolidColorBrush(Colors.Red);
-            collisionObj.Fill = new SolidColorBrush(Colors.Red);
-            this.canvas.Children.Remove(obj);
-            this.canvas.Children.Remove(collisionObj);
-            this.quadTree.delete(obj);
-            this.quadTree.delete(collisionObj);
+            var a_min_x = a.x - a.Width / 2;
+            var a_min_y = a.y - a.Height / 2;
+            var a_max_x = a.x + a.Width / 2;
+            var a_max_y = a.y + a.Height / 2;
+            var b_min_x = b.x - b.Width / 2;
+            var b_min_y = b.y - b.Height / 2;
+            var b_max_x = b.x + b.Width / 2;
+            var b_max_y = b.y + b.Height / 2;
+            return a_min_x <= b_max_x && a_max_x >= b_min_x && a_min_y <= b_max_y && a_max_y >= b_min_y;
         }
 
-        private bool IsColliding(Rectangle obj, Rectangle obj2)
-        {
-            Rect rectObj = new Rect(Canvas.GetLeft(obj), Canvas.GetTop(obj), obj.Width, obj.Height);
-            Rect rectObj2 = new Rect(Canvas.GetLeft(obj2), Canvas.GetTop(obj2), obj2.Width, obj2.Height);
-            return rectObj.IntersectsWith(rectObj2);
-        }
-
-        //遍历四叉树，如果节点的Bound不为空，就绘制
         private void AddLine(QuadTree quard, QuadTreeNode node)
         {
+           
             if (node == quard.root)
             {
                 // 使用 LINQ 查询语句筛选出颜色为黄色的矩形
@@ -478,7 +267,6 @@ namespace Firmament
                     canvas.Children.Remove(rectangle);
                 }
             }
-
             if (node != null)
             {
                 Rectangle rectangle = new Rectangle();
@@ -496,6 +284,7 @@ namespace Firmament
                     AddLine(quard, node2);
                 }
             }
+
         }
     }
 }

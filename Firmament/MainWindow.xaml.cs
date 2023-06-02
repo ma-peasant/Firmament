@@ -36,8 +36,8 @@ namespace Firmament
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            frame.Navigate(new EasyQuardTreeTestPage());
-            //frame.Navigate(new QuardTreeTestPage());
+            //frame.Navigate(new EasyQuardTreeTestPage());
+            frame.Navigate(new QuardTreeTestPage());
         }
     }
 }
