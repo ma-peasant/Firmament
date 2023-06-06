@@ -16,6 +16,7 @@ namespace Firmament.Module
         public int row = 0;
         /**列 */
         public int col= 0;
+        public int flag = 0;
         /**移动速度 */
         public double speed = 4;
         /**x轴速度 */

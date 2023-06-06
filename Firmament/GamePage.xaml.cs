@@ -330,7 +330,7 @@ namespace Firmament
         {
             count = 0;
             canvas.Children.Clear();
-            quadTree = new QuadTree(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight);
+            quadTree = new QuadTree(new Rect(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight), 5);
             for (int i = 0; i < 50; i++)
             {
                 double x = random.NextDouble() * 10 * this.canvas.ActualWidth / 10;
@@ -400,48 +400,49 @@ namespace Firmament
         int count = 0;
         private void HitCheck(QuadTree quard, QuadTreeNode root)
         {
-            if (root != null)
-            {
-                if (root.Objects.Count > 0)
-                {
-                    // 进行碰撞检测
-                    foreach (Ball obj in root.Objects)
-                    {
-                        // 查询与当前对象可能发生碰撞的其他对象
-                        List<Ball> potentialCollisions = quard.Query(obj);
-                        //要排除自身
-                        if (potentialCollisions.Contains(obj))
-                        {
-                            potentialCollisions.Remove(obj);
-                        }
-                        if (potentialCollisions.Count > 0)
-                        {
-                            bool isHit = false;
-                            // 对查询到的对象进行碰撞检测
-                            foreach (var collisionObj in potentialCollisions)
-                            {
-                                if (IsColliding(obj, collisionObj))
-                                {
-                                    isHit = true;
-                                    HandleCollision(obj, collisionObj);
-                                    break;
-                                }
-                            }
-                            if (!isHit)
-                            {
-                                obj.rectangle.Fill = new SolidColorBrush(Colors.Green);
-                            }
+            //if (root != null)
+            //{
+            //    if (root.Objects.Count > 0)
+            //    {
+            //        // 进行碰撞检测
+            //        foreach (Ball obj in root.Objects)
+            //        {
+            //            // 查询与当前对象可能发生碰撞的其他对象
+            //            //List<Ball> potentialCollisions = quard.Query(obj);
+            //            //List<Ball> list = this.ballList.Where(ball => ball.flag == ballA.flag).ToList();
+            //            //要排除自身
+            //            if (potentialCollisions.Contains(obj))
+            //            {
+            //                potentialCollisions.Remove(obj);
+            //            }
+            //            if (potentialCollisions.Count > 0)
+            //            {
+            //                bool isHit = false;
+            //                // 对查询到的对象进行碰撞检测
+            //                foreach (var collisionObj in potentialCollisions)
+            //                {
+            //                    if (IsColliding(obj, collisionObj))
+            //                    {
+            //                        isHit = true;
+            //                        HandleCollision(obj, collisionObj);
+            //                        break;
+            //                    }
+            //                }
+            //                if (!isHit)
+            //                {
+            //                    obj.rectangle.Fill = new SolidColorBrush(Colors.Green);
+            //                }
 
-                        }
+            //            }
 
-                    }
-                }
+            //        }
+            //    }
 
-                foreach (QuadTreeNode node2 in root.Children)
-                {
-                    HitCheck(quard, node2);
-                }
-            }
+            //    foreach (QuadTreeNode node2 in root.Children)
+            //    {
+            //        HitCheck(quard, node2);
+            //    }
+            //}
         }
 
         private void HandleCollision(Ball obj, Ball collisionObj)

@@ -31,6 +31,7 @@ namespace Firmament
         QuadTree rootTree;
         private const int BallCount = 1000;
         Random random = new Random();
+        private const int MaxCount = 5;
         //界面边缘
         private double maxWidth;
         private double maxHeight;
@@ -45,7 +46,7 @@ namespace Firmament
             this.maxWidth = this.canvas.ActualWidth - 10;
             this.maxHeight = this.canvas.ActualHeight - 10;
             ballList = new List<Ball>();
-            rootTree =  new QuadTree(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight);
+            rootTree =  new QuadTree(new Rect(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight),MaxCount);
         }
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
@@ -71,7 +72,7 @@ namespace Firmament
                 //随机速度
                 ball.xSpeed = random.NextDouble() * ball.speed;
                 ball.ySpeed = random.NextDouble() * ball.speed;
-                //this.rootTree.Insert(ball);
+                this.rootTree.Insert(ball);
                 ballList.Add(ball);
                 this.canvas.Children.Add(ball.rectangle);
             }
@@ -87,45 +88,30 @@ namespace Firmament
 
         private void Timer_Tick(object sender, ElapsedEventArgs e)
         {
-            update();
+            Update();
         }
-        public void update()
+        public void Update()
         {
             updateBallMove();
-            this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            {
-                this.AddLine(rootTree, rootTree.root);
-            });
-           
-
-            //this.updateBallGrid();
+            //需要计算小球的矩形情况
+            this.updateBallGrid();
+            //this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            //{
+            //    this.AddLine(rootTree, rootTree.root, true);
+            //});
             ////检查碰撞
-            //this.checkCollision();
+            this.checkCollision();
+            
         }
 
         private void updateBallGrid()
         {
-            ////清理格子
-            //for (int i = 0; i < this.gridRow; i++)
-            //{
-            //    for (int j = 0; j < this.gridCol; j++)
-            //    {
-            //        this.gridList[i][j].Clear();
-            //    }
-            //}
-
-            rootTree.Update();
+            rootTree.Update(this.ballList);
 
             //将小球置蓝色，重新计算小球所属行列的格子
             for (int i = 0; i < this.ballList.Count; i++)
             {
                 Ball ball = this.ballList[i];
-                ////位置x决定的是所在的列，y决定所在的行
-                //int row = (int)Math.Floor(ball.y / this.gridHeight);
-                //int col = (int)Math.Floor(ball.x / this.gridWidth);
-                //ball.row = row;
-                //ball.col = col;
-                //this.gridList[row][col].Add(ball);
                 this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
                     ball.Hit_State = false;
@@ -171,66 +157,55 @@ namespace Firmament
                     Canvas.SetTop(ball.rectangle, ball.y);
                 });
             }
-
-            //Parallel.ForEach(ballList, ball =>
-            //{
-            //    //移动
-            //    ball.x += ball.xSpeed;
-            //    ball.y += ball.ySpeed;
-            //    //边缘检测 达到边缘后速度取反
-            //    if (ball.x + ball.Width / 2 > this.maxWidth)
-            //    {
-            //        ball.x = this.maxWidth - ball.Width / 2;
-            //        ball.xSpeed = -ball.speed;
-            //    }
-            //    else if (ball.x - ball.Width / 2 < 0)
-            //    {
-            //        ball.x = ball.Width / 2;
-            //        ball.xSpeed = ball.speed;
-            //    }
-            //    if (ball.y + ball.Height / 2 > this.maxHeight)
-            //    {
-            //        ball.y = this.maxHeight - ball.Height / 2;
-            //        ball.ySpeed = -ball.speed;
-            //    }
-            //    else if (ball.y - ball.Height / 2 < 0)
-            //    {
-            //        ball.y = ball.Height / 2;
-            //        ball.ySpeed = ball.speed;
-            //    }
-            //    this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //    {
-            //        Canvas.SetLeft(ball.rectangle, ball.x);
-            //        Canvas.SetTop(ball.rectangle, ball.y);
-            //    });
-            //});
         }
 
         private void checkCollision()
         {
+           
             for (int i = 0; i < this.ballList.Count; i++)
             {
-                Ball ballA = this.ballList[i];
-                List<Ball> list = this.rootTree.Query(ballA);
-                for (int j = 0; j < list.Count; j++)
+                try
                 {
-                    //count++;
-                    Ball ballB = list[j];
-                    if (ballA != ballB)
+                    Ball ballA = this.ballList[i];
+                    List<Ball> list = this.ballList.Where(ball=>ball.flag == ballA.flag).ToList();
+                    if (list != null && list.Count > 0)
                     {
-                        if (this.rectRect(ballA, ballB))
+                        for (int j = 0; j < list.Count; j++)
                         {
-                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                            Ball ballB = list[j];
+                            if (ballB == null) {
+                                break;
+                            }
+                            if (ballA != ballB)
                             {
-                                ballA.Hit_State = true;
-                                ballB.Hit_State = true;
-                                //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
-                                //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
-                            });
+                                if (this.rectRect(ballA, ballB))
+                                {
+                                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                                    {
+                                        ballA.Hit_State = true;
+                                        ballB.Hit_State = true;
+                                        //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
+                                        //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
 
+                                        this.canvas.Children.Remove(ballA.rectangle);
+                                        this.canvas.Children.Remove(ballB.rectangle);
+                                    });
+                                    this.ballList.Remove(ballA);
+                                    this.ballList.Remove(ballB);
+                                }
+                            }
                         }
                     }
                 }
+                catch (NullReferenceException e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                catch (InvalidOperationException e) {
+                    Console.WriteLine(e.Message);
+                }
+               
+                
             }
             //Console.WriteLine("检查次数:", count);
         }
@@ -254,11 +229,9 @@ namespace Firmament
             return a_min_x <= b_max_x && a_max_x >= b_min_x && a_min_y <= b_max_y && a_max_y >= b_min_y;
         }
 
-        private void AddLine(QuadTree quard, QuadTreeNode node)
+        private void AddLine(QuadTree quard, QuadTreeNode node,bool isupdate)
         {
-           
-            if (node == quard.root)
-            {
+            if (isupdate) {
                 // 使用 LINQ 查询语句筛选出颜色为黄色的矩形
                 var yellowRectangles = canvas.Children.OfType<Rectangle>().Where(rectangle => rectangle.Stroke is SolidColorBrush brush && brush.Color == Colors.Yellow).ToList();
                 // 从 Children 集合中移除筛选出的矩形
@@ -281,10 +254,9 @@ namespace Firmament
 
                 foreach (QuadTreeNode node2 in node.Children)
                 {
-                    AddLine(quard, node2);
+                    AddLine(quard, node2, false);
                 }
             }
-
         }
     }
 }
