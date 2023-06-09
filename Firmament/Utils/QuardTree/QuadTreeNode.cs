@@ -20,9 +20,9 @@ namespace Firmament.Utils.QuardTree
         public int flag { get; set; }    //节点的标记，处于该节点下的objects的flag保持一致
 
 
-        private List<Ball> objectList;
+        private List<BaseElement> objectList;
         //自身存在的矩形个数
-        public List<Ball> Objects {
+        public List<BaseElement> Objects {
             get{ return objectList; }
             set {
                 objectList = value;
@@ -35,7 +35,7 @@ namespace Firmament.Utils.QuardTree
         public QuadTreeNode(Rect bounds ,int flag)
         {
             Bounds = bounds;
-            Objects = new List<Ball>();
+            Objects = new List<BaseElement>();
             Children = new List<QuadTreeNode>();
             IsLeaf = true;
             this.flag = flag;

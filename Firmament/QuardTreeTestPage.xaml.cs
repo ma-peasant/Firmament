@@ -67,14 +67,14 @@ namespace Firmament
                 Ball ball = new Ball();
                 ball.x = random.NextDouble() * this.maxWidth;
                 ball.y = random.NextDouble() * this.maxHeight;
-                Canvas.SetLeft(ball.rectangle, ball.x);
-                Canvas.SetTop(ball.rectangle, ball.y);
+                Canvas.SetLeft(ball.control, ball.x);
+                Canvas.SetTop(ball.control, ball.y);
                 //随机速度
                 ball.xSpeed = random.NextDouble() * ball.speed;
                 ball.ySpeed = random.NextDouble() * ball.speed;
                 this.rootTree.Insert(ball);
                 ballList.Add(ball);
-                this.canvas.Children.Add(ball.rectangle);
+                this.canvas.Children.Add(ball.control);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Firmament
 
         private void updateBallGrid()
         {
-            rootTree.Update(this.ballList);
+            rootTree.Update(this.ballList.ToList<BaseElement>());
 
             //将小球置蓝色，重新计算小球所属行列的格子
             for (int i = 0; i < this.ballList.Count; i++)
@@ -153,8 +153,8 @@ namespace Firmament
                 }
                 this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
-                    Canvas.SetLeft(ball.rectangle, ball.x);
-                    Canvas.SetTop(ball.rectangle, ball.y);
+                    Canvas.SetLeft(ball.control, ball.x);
+                    Canvas.SetTop(ball.control, ball.y);
                 });
             }
         }
@@ -187,8 +187,8 @@ namespace Firmament
                                         //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
                                         //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
 
-                                        this.canvas.Children.Remove(ballA.rectangle);
-                                        this.canvas.Children.Remove(ballB.rectangle);
+                                        this.canvas.Children.Remove(ballA.control);
+                                        this.canvas.Children.Remove(ballB.control);
                                     });
                                     this.ballList.Remove(ballA);
                                     this.ballList.Remove(ballB);

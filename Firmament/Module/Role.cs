@@ -14,24 +14,25 @@ using System.Windows.Threading;
 namespace Firmament.Module
 {
     //游戏角色
-    public class Role :Image
+    public class Role :BaseElement
     {
-
         public List<Bullet> bullets = new List<Bullet>();
 
         private CancellationTokenSource cancellation = new CancellationTokenSource();
         public Role() {
-            //Image image = new Image();
-            this.Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
+            this.control  = new Image();
+            (this.control as Image).Width = 30;
+            (this.control as Image).Height = 30;
+            (this.control as Image).Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
             this.Width = 30;
             this.Height = 30;
         }
         public Rect getRec()
         {
-            return new Rect(Canvas.GetLeft(this), Canvas.GetTop(this), 30, 30);
+            return new Rect(this.x, this.y, 30, 30);
         }
 
-        public Rectangle Shoot()
+        public Bullet Shoot()
         {
            
             //Rectangle rectangle =  await new TaskFactory().StartNew(() =>
@@ -40,7 +41,8 @@ namespace Firmament.Module
             //    return bullet.rectangle;
             //});
             Bullet bullet = new Bullet(this);
-            return bullet.rectangle;
+            bullet.tag = 3;
+            return bullet;
         }
 
         public void StopShoot()

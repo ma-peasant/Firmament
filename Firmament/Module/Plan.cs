@@ -1,62 +1,92 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Firmament.Utils;
+using System;
+using System.Threading;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace Firmament.Module
 {
     //暂时是
-   public class Plan :Image
+   public class Plan : BaseElement
     {
+        private double maxWidth, maxHeight;
+        private System.Timers.Timer timer = null;
         public Plan()
         {
-            this.Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
+           control = new Image();
+            (control as Image).Width = 30;
+            (control as Image).Height = 30;
+            (control as Image).Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
             this.Width = 30;
             this.Height = 30;
-        }
-        public void Show(double x , double y) {
-            DoubleAnimation daX = new DoubleAnimation();
-            DoubleAnimation daY = new DoubleAnimation();
-            //指定起点
-            daX.From = new Random().Next(0,400);
-            daY.From = 0;
-            //指定终点
-            //Random r = new Random();
-            daX.To = new Random().Next(0,400);
-            daY.To = y;
-            //指定时长
-            Duration duration = new Duration(TimeSpan.FromSeconds(10));
-            daX.Duration = duration;
-            daY.Duration = duration;
-            //动画的主题是TranslateTransform变形，而非Button
-            this.BeginAnimation(Canvas.LeftProperty, daX);
-            this.BeginAnimation(Canvas.TopProperty, daY);
-            //image.Source = null;
-            //image = null;
-        }
-        public Rect getRec() {
-            return new Rect(Canvas.GetLeft(this),Canvas.GetTop(this),30,30);
-        
-        }
+            this.ySpeed = 3;
 
-        public bool IsOver(List<Bullet> bullets)
+            this.x = new Random().Next(10, 400);
+            this.y = 30;
+        }
+        public void Show(double width, double height)
         {
-            for (int i = 0; i < bullets.Count; i++)
+            this.maxWidth = width;
+            this.maxHeight = height;
+            InitUpdateTimer();
+        }
+        private void updateBallMove()
+        {
+            bool isout = false;
+            
+            this.y += this.ySpeed;
+            //边缘检测 达到边缘后速度取反
+            if (this.x + this.Width / 2 > this.maxWidth)
             {
-                bool isCollision = bullets[i].getRec().IntersectsWith(this.getRec());
-                if (isCollision)
-                {
-                    return true;
-                }
+                isout = true;
             }
-            return false;
+            else if (this.x - this.Width / 2 < 0)
+            {
+                isout = true;
+            }
+            if (this.y + this.Height / 2 > this.maxHeight)
+            {
+                isout = true;
+            }
+            else if (this.y - this.Height / 2 < 0)
+            {
+                isout = true;
+            }
+            if (isout)
+            {
+                timer.Stop();
+                timer.Dispose();
+                //在UI和四叉树上移除该对象
+                Common.ballList.Remove(this);
+                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Common.frmae.canvas.Children.Remove(this.control);
+                });
+            }
+            else {
+                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Canvas.SetLeft(this.control, this.x);
+                    Canvas.SetTop(this.control, this.y);
+                });
+            }
+           
+        }
+        private void InitUpdateTimer()
+        {
+            timer = new System.Timers.Timer();
+            timer.Interval = 100; // 更新间隔，可以根据需要调整   大概就是30帧
+            timer.Elapsed += Timer_Tick; ;
+            timer.Start();
         }
 
-
+        private void Timer_Tick(object sender, ElapsedEventArgs e)
+        {
+            updateBallMove();
+        }
     }
 }

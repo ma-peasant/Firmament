@@ -66,10 +66,11 @@
     <Compile Include="GamePage.xaml.cs">
       <DependentUpon>GamePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Module\BaseElement.cs" />
     <Compile Include="QuardTreeTestPage.xaml.cs">
       <DependentUpon>QuardTreeTestPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utils\CheckCollision.cs" />
+    <Compile Include="Utils\QuardTreeHelp.cs" />
     <Compile Include="Utils\Common.cs" />
     <Compile Include="Utils\QuardTree\QuadTree.cs" />
     <Compile Include="Utils\QuardTree\QuadTreeNode.cs" />

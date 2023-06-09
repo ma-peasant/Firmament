@@ -13,35 +13,28 @@ namespace Firmament.Module
     /// <summary>
     ///子弹类
     /// </summary>
-    public class Bullet
+    public class Bullet: BaseElement
     {
-        private int speed = 10;
-
-        public Rectangle rectangle;
 
         public Bullet(Role role)
         {
-            rectangle = new Rectangle();
-            rectangle.Fill = new SolidColorBrush(Colors.Red);
-            rectangle.Width = 2;
-            rectangle.Height = 5;
-            Canvas.SetLeft(rectangle, Canvas.GetLeft(role) + 13);
-            Canvas.SetTop(rectangle, Canvas.GetTop(role));
+            control = new Rectangle();
+            ((Rectangle)control).Fill = new SolidColorBrush(Colors.Red);
+            (control as Rectangle).Width = 2;
+            control.Height = 5;
+            Canvas.SetLeft((control as Rectangle), Canvas.GetLeft(role.control) + 13);
+            Canvas.SetTop((control as Rectangle), Canvas.GetTop(role.control));
             Move(role);
         }
 
         public void Move(Role role)
         {
             DoubleAnimation daY = new DoubleAnimation();
-            daY.From = Canvas.GetTop(role);
+            daY.From = Canvas.GetTop(role.control);
             daY.To = 0;
             double second = 1;
             daY.Duration = new System.Windows.Duration(TimeSpan.FromSeconds(second));
-            rectangle.BeginAnimation(Canvas.TopProperty, daY);
-        }
-        public Rect getRec()
-        {
-            return new Rect(Canvas.GetLeft(rectangle), Canvas.GetTop(rectangle), 2, 5);
+            (control as Rectangle).BeginAnimation(Canvas.TopProperty, daY);
         }
     }
 }

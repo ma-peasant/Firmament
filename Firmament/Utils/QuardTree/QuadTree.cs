@@ -9,16 +9,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-
 namespace Firmament.Utils.QuardTree
 {
     // 定义四叉树
     public class QuadTree
     {
-        //public List<Ball> ballList = new List<Ball>();
-
         public  QuadTreeNode root;
-        public int MaxCount = 10;
+        public int MaxCount = 10;  //默认是10
         //用于给节点设置flag
         public int flag = 0;
         public QuadTree(Rect rect ,int maxCount)
@@ -28,13 +25,13 @@ namespace Firmament.Utils.QuardTree
         }
 
         // 将对象插入四叉树
-        public void Insert(Ball obj)
+        public void Insert(BaseElement obj)
         {
             InsertObject(root, obj);
         }
 
         // 递归插入对象到指定节点或子节点
-        private void InsertObject(QuadTreeNode node, Ball obj)
+        private void InsertObject(QuadTreeNode node, BaseElement obj)
         {
             // 检查对象是否在节点范围内
             if (!IsObjectInBounds(node.Bounds, obj))
@@ -88,7 +85,7 @@ namespace Firmament.Utils.QuardTree
         }
 
         // 检查对象是否在边界框内
-        private bool IsObjectInBounds(Rect bounds, Ball obj)
+        private bool IsObjectInBounds(Rect bounds, BaseElement obj)
         {
             return obj.x >= bounds.X &&
                    obj.y >= bounds.Y &&
@@ -99,13 +96,13 @@ namespace Firmament.Utils.QuardTree
         /// <summary>
         /// 更新节点状态
         /// </summary>
-        public void Update(List<Ball> balls)
+        public void Update(List<BaseElement> list)
         {
             flag = 0;
             //1、清理四叉树节点
             ClearTree(root);
             //2、重新插入节点
-            RebuildTree(root, balls);
+            RebuildTree(root, list);
         }
 
         private void ClearTree(QuadTreeNode node)
@@ -113,9 +110,9 @@ namespace Firmament.Utils.QuardTree
             node.Clear(true);
         }
 
-        private void RebuildTree(QuadTreeNode node, List<Ball> balls)
+        private void RebuildTree(QuadTreeNode node, List<BaseElement> list)
         {
-            foreach (Ball obj in balls)
+            foreach (BaseElement obj in list)
             {
                 InsertObject(node,obj);
             }
@@ -131,13 +128,13 @@ namespace Firmament.Utils.QuardTree
         /// <summary>
         /// 删除节点
         /// </summary>
-        public void delete(Ball rec) {
+        public void delete(BaseElement rec) {
             deleteNode(root, rec);
         }
 
-        public void deleteNode(QuadTreeNode node, Ball rec)
+        public void deleteNode(QuadTreeNode node, BaseElement rec)
         {
-            foreach (Ball rect in node.Objects)
+            foreach (BaseElement rect in node.Objects)
             {
                 if (rec == rect)
                 {

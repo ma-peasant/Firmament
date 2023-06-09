@@ -106,13 +106,13 @@ namespace Firmament
                 Ball ball = new Ball();
                 ball.x = random.NextDouble() * this.maxWidth;
                 ball.y = random.NextDouble() * this.maxHeight;
-                Canvas.SetLeft(ball.rectangle, ball.x);
-                Canvas.SetTop(ball.rectangle, ball.y);
+                Canvas.SetLeft(ball.control, ball.x);
+                Canvas.SetTop(ball.control, ball.y);
                 //随机速度
                 ball.xSpeed = random.NextDouble() * ball.speed;
                 ball.ySpeed = random.NextDouble() * ball.speed;
                 this.ballList.Add(ball);
-                this.canvas.Children.Add(ball.rectangle);
+                this.canvas.Children.Add(ball.control);
             }
 
             int groupCount  = BallCount / taskCount;
@@ -191,8 +191,8 @@ namespace Firmament
                         }
                         this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                         {
-                            Canvas.SetLeft(ball.rectangle, ball.x);
-                            Canvas.SetTop(ball.rectangle, ball.y);
+                            Canvas.SetLeft(ball.control, ball.x);
+                            Canvas.SetTop(ball.control, ball.y);
                         });
                     }
                 });
@@ -267,8 +267,8 @@ namespace Firmament
                 }
                 this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
-                    Canvas.SetLeft(ball.rectangle, ball.x);
-                    Canvas.SetTop(ball.rectangle, ball.y);
+                    Canvas.SetLeft(ball.control, ball.x);
+                    Canvas.SetTop(ball.control, ball.y);
                 });
             });
         }
@@ -364,7 +364,6 @@ namespace Firmament
         /**碰撞检测 */
         private void checkCollision()
         {
-            int count = 0;
             for (int i = 0; i < this.ballList.Count; i++)
             {
                 Ball ballA = this.ballList[i];
