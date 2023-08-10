@@ -67,6 +67,9 @@
       <DependentUpon>GamePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Module\BaseElement.cs" />
+    <Compile Include="SudokuGamePage.xaml.cs">
+      <DependentUpon>SudokuGamePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="QuardTreeTestPage.xaml.cs">
       <DependentUpon>QuardTreeTestPage.xaml</DependentUpon>
     </Compile>
@@ -92,6 +95,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="GamePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SudokuGamePage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
