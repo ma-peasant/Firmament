@@ -200,123 +200,7 @@ namespace Firmament
             }
             Task.WaitAll(tasks.ToArray());
         }
-
-        private void updateBallMove()
-        {
-            //int len = this.ballList.Count;
-            //Ball ball;
-            //for (int i = 0; i < len; i++)
-            //{
-            //    ball = ballList[i];
-            //    //移动
-            //    ball.x += ball.xSpeed;
-            //    ball.y += ball.ySpeed;
-            //    //边缘检测 达到边缘后速度取反
-            //    if (ball.x + ball.Width / 2 > this.maxWidth)
-            //    {
-            //        ball.x = this.maxWidth - ball.Width / 2;
-            //        ball.xSpeed = -ball.speed;
-            //    }
-            //    else if (ball.x - ball.Width / 2 < 0)
-            //    {
-            //        ball.x = ball.Width / 2;
-            //        ball.xSpeed = ball.speed;
-            //    }
-            //    if (ball.y + ball.Height / 2 > this.maxHeight)
-            //    {
-            //        ball.y = this.maxHeight - ball.Height / 2;
-            //        ball.ySpeed = -ball.speed;
-            //    }
-            //    else if (ball.y - ball.Height / 2 < 0)
-            //    {
-            //        ball.y = ball.Height / 2;
-            //        ball.ySpeed = ball.speed;
-            //    }
-            //    this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //    {
-            //        Canvas.SetLeft(ball.rectangle, ball.x);
-            //        Canvas.SetTop(ball.rectangle, ball.y);
-            //    });
-            //}
-
-            Parallel.ForEach(ballList, ball =>
-            {
-                //移动
-                ball.x += ball.xSpeed;
-                ball.y += ball.ySpeed;
-                //边缘检测 达到边缘后速度取反
-                if (ball.x + ball.Width / 2 > this.maxWidth)
-                {
-                    ball.x = this.maxWidth - ball.Width / 2;
-                    ball.xSpeed = -ball.speed;
-                }
-                else if (ball.x - ball.Width / 2 < 0)
-                {
-                    ball.x = ball.Width / 2;
-                    ball.xSpeed = ball.speed;
-                }
-                if (ball.y + ball.Height / 2 > this.maxHeight)
-                {
-                    ball.y = this.maxHeight - ball.Height / 2;
-                    ball.ySpeed = -ball.speed;
-                }
-                else if (ball.y - ball.Height / 2 < 0)
-                {
-                    ball.y = ball.Height / 2;
-                    ball.ySpeed = ball.speed;
-                }
-                this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    Canvas.SetLeft(ball.control, ball.x);
-                    Canvas.SetTop(ball.control, ball.y);
-                });
-            });
-        }
-
-        /**刷新小球所在格子 */
-        private void updateBallGrid()
-        {
-            //清理格子
-            for (int i = 0; i < this.gridRow; i++)
-            {
-                for (int j = 0; j < this.gridCol; j++)
-                {
-                    this.gridList[i][j].Clear();
-                }
-            }
-
-
-            Parallel.ForEach(ballList, ball =>
-            {
-                //位置x决定的是所在的列，y决定所在的行
-                int row = (int)Math.Floor(ball.y / this.gridHeight);
-                int col = (int)Math.Floor(ball.x / this.gridWidth);
-                ball.row = row;
-                ball.col = col;
-                this.gridList[row][col].Add(ball);
-                this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    ball.Hit_State = false;
-                    //ball.rectangle.Fill = new SolidColorBrush(Colors.Blue);
-                });
-            });
-            ////将小球置蓝色，重新计算小球所属行列的格子
-            //for (int i = 0; i < this.ballList.Count; i++)
-            //{
-            //    Ball ball = this.ballList[i];
-            //    //位置x决定的是所在的列，y决定所在的行
-            //    int row = (int)Math.Floor(ball.y / this.gridHeight);
-            //    int col = (int)Math.Floor(ball.x / this.gridWidth);
-            //    ball.row = row;
-            //    ball.col = col;
-            //    this.gridList[row][col].Add(ball);
-            //    this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //    {
-            //        ball.Hit_State = false;
-            //        //ball.rectangle.Fill = new SolidColorBrush(Colors.Blue);
-            //    });
-            //}
-         }
+       
 
         /**刷新小球所在格子 */
         private void updateBallGridWithTask()
@@ -404,6 +288,7 @@ namespace Firmament
                             {
                                 ball.Hit_State = true;
                                 ballB.Hit_State = true;
+                               
                                 //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
                                 //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
                             });

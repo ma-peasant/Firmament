@@ -29,6 +29,9 @@ namespace Firmament.Module
 
         private bool hit_state = false;
 
+        public int col;
+        public int row;
+
         public BaseElement()
         {
         }

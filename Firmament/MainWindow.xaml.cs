@@ -38,13 +38,11 @@ namespace Firmament
         {
             //frame.Navigate(new EasyQuardTreeTestPage());
             //frame.Navigate(new QuardTreeTestPage());
-            frame.Navigate(new SudokuGamePage());
+            //frame.Navigate(new SudokuGamePage());
+            GamePage game = new GamePage();
+            Common.InitCommon(game);
+            frame.Navigate(game);
 
-
-            //GamePage game = new GamePage();
-            //Common.InitCommon(game);
-            //frame.Navigate(game);
-           
         }
     }
 }

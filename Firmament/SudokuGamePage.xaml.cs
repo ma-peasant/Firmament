@@ -171,7 +171,7 @@ namespace Firmament
                     }
                 }
                 //判断是否胜利
-                //AdjustResult(grid_root);
+                AdjustResult(grid_root);
             }
         }
 

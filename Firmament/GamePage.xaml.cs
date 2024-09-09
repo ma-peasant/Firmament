@@ -49,18 +49,9 @@ namespace Firmament
         {
             InitializeComponent();
             this.Loaded += QuardTreeTestPage_Loaded; ;
-            this.KeyDown += MainWindow_KeyDown;
-            this.KeyUp += MainWindow_KeyUp;
         }
 
-        private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            InitKeyDownTimer();
-            InitArmyProductTimer();
-            quardTreeHelp = new QuardTreeHelp(this.canvas.ActualWidth, this.ActualHeight, 10);
-        }
-
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        private void GamePage_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.S)
             {
@@ -82,8 +73,10 @@ namespace Firmament
             {
                 isDownKeyPressed = false;
             }
+            e.Handled = true;
         }
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+
+        private void GamePage_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Left)
             {
@@ -105,13 +98,21 @@ namespace Firmament
             {
                 isSKeyPressed = true;
             }
+            e.Handled = true;
+        }
+
+        private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            InitKeyDownTimer();
+            InitArmyProductTimer();
+            quardTreeHelp = new QuardTreeHelp(this.canvas);
         }
 
         #region 定时器初始化
         private void InitKeyDownTimer()
         {
             KeyDownTimer = new System.Timers.Timer();
-            KeyDownTimer.Interval = 50; // 计时器间隔为 100 毫秒
+            KeyDownTimer.Interval = 100; // 计时器间隔为 100 毫秒
             KeyDownTimer.AutoReset = true;
             KeyDownTimer.Elapsed += KeyDownTimer_Elapsed;
         }
@@ -136,6 +137,7 @@ namespace Firmament
                 plan.tag = 1;
                 canvas.Children.Add(plan.control);
                 plan.Show(canvas.ActualWidth, canvas.ActualHeight);
+                quardTreeHelp.InsertElement(plan);
             });
         }
 
@@ -212,11 +214,12 @@ namespace Firmament
             {
                 if (role != null)
                 {
+                    role.x = left;
+                    role.y = top;
                     Canvas.SetLeft(role.control, left);
                     Canvas.SetTop(role.control, top);
                 }
             });
-
         }
         #endregion
 
@@ -229,15 +232,15 @@ namespace Firmament
             quardTreeHelp.InsertElement(role);
             left = canvas.ActualWidth / 2;
             top = canvas.ActualHeight - 50;
+            role.x = left;
+            role.y = top;
             //2、让角色位于中间
-            Canvas.SetLeft(role.control, left);
-            Canvas.SetTop(role.control, top);
+            Canvas.SetLeft(role.control, role.x);
+            Canvas.SetTop(role.control, role.y);
             //3、启动定时器
             KeyDownTimer.Start();     //按键功能扫描
             ArmyProductTimer.Start(); //生产敌机扫描
             //4、检测碰撞
-            //AdjustAll();
-            quardTreeHelp.InitUpdateTimer();
         }
 
     }

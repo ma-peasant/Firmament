@@ -49,21 +49,23 @@ namespace Firmament.Module
         {
             cancellation?.Cancel();
         }
-
-        //public void Shoot()
-        //{
-        //    Task task = new TaskFactory().StartNew(() => {
-        //        while (cancellation.Token.IsCancellationRequested)
-        //        {
-        //            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-        //            {
-        //                Bullet bullet = new Bullet(this);
-        //                bullets.Add(bullet);
-        //            });
-        //            Thread.Sleep(200);
-        //        }
-        //    });
-        //}
-
+        public override bool Hit_State
+        {
+            set
+            {
+                base.Hit_State = value;
+                if (base.Hit_State)
+                {
+                    MessageBox.Show("游戏结束");
+                }
+                else
+                {
+                }
+            }
+            get
+            {
+                return base.Hit_State;
+            }
+        }
     }
 }
