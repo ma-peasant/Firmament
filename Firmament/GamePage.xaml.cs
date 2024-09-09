@@ -29,8 +29,6 @@ namespace Firmament
        
 
         Role role = null;
-        double left = 0;
-        double top = 0;
 
         bool isSKeyPressed = false;
         bool isLeftKeyPressed = false;
@@ -148,6 +146,8 @@ namespace Firmament
         /// <param name="e"></param>
         private void KeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            double left = role.x;
+            double top = role.y;
             if (isLeftKeyPressed)
             {
                 left = left - 10;
@@ -216,8 +216,8 @@ namespace Firmament
                 {
                     role.x = left;
                     role.y = top;
-                    Canvas.SetLeft(role.control, left);
-                    Canvas.SetTop(role.control, top);
+                    Canvas.SetLeft(role.control, role.x);
+                    Canvas.SetTop(role.control, role.y);
                 }
             });
         }
@@ -230,10 +230,8 @@ namespace Firmament
             role.tag = 0;
             canvas.Children.Add(role.control);
             quardTreeHelp.InsertElement(role);
-            left = canvas.ActualWidth / 2;
-            top = canvas.ActualHeight - 50;
-            role.x = left;
-            role.y = top;
+            role.x = canvas.ActualWidth / 2;
+            role.y = canvas.ActualHeight - 50;
             //2、让角色位于中间
             Canvas.SetLeft(role.control, role.x);
             Canvas.SetTop(role.control, role.y);
@@ -241,6 +239,7 @@ namespace Firmament
             KeyDownTimer.Start();     //按键功能扫描
             ArmyProductTimer.Start(); //生产敌机扫描
             //4、检测碰撞
+            quardTreeHelp.InitUpdateTimer();
         }
 
     }

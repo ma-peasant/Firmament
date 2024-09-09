@@ -14,12 +14,12 @@ using System.Windows.Threading;
 namespace Firmament.Utils
 {
     //检测碰撞
-    class QuardTreeHelp
+    public class QuardTreeHelp
     {
         //将球分组创建Task任务
         List<List<BaseElement>> collections = new List<List<BaseElement>>();
         //最大任务数，和小球的分类数保持一致
-        private int taskCount = 500;
+        private int taskCount = 50;
         List<Task> tasks = new List<Task>();
         private int interval = 100;    //时间间隔 ms
         private Random random = new Random();
@@ -29,13 +29,13 @@ namespace Firmament.Utils
         /**舞台高度/2 */
         private double maxHeight;
         /**小球列表 */
-        private List<BaseElement> ballList;
+        public  List<BaseElement> ballList;
         /**格子区域二位数组 */
         List<List<List<BaseElement>>> gridList = new List<List<List<BaseElement>>>();
         /**格子行数 */
-        private int gridRow = 20;
+        private int gridRow = 5;
         /**格子列数 */
-        private int gridCol = 20;
+        private int gridCol = 5;
         /**格子高宽 */
         private int gridWidth = 400;
         /**格子高宽 */
@@ -49,6 +49,7 @@ namespace Firmament.Utils
             this.gridHeight = (int)Math.Floor(canvas.ActualHeight / this.gridRow);
             this.gridWidth = (int)Math.Floor(canvas.ActualWidth / this.gridCol);
             this.ballList = new List<BaseElement>();
+            Common.ballList = this.ballList;
             //舞台边缘值
             this.maxWidth = canvas.ActualWidth - 10;
             this.maxHeight = canvas.ActualHeight - 10;
@@ -63,8 +64,6 @@ namespace Firmament.Utils
                     gridList[i].Add(new List<BaseElement>());
                 }
             }
-
-            InitUpdateTimer();
         }
 
 
@@ -74,7 +73,7 @@ namespace Firmament.Utils
         }
 
 
-        private void InitUpdateTimer()
+        public void InitUpdateTimer()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = this.interval; // 更新间隔，可以根据需要调整   大概就是30帧
@@ -91,6 +90,8 @@ namespace Firmament.Utils
         public void update()
         {
             int count = this.ballList.Count;
+            collections.Clear();
+            taskCount = 50;
             if (count > 0)
             {
                 int groupCount = count / taskCount;
@@ -111,8 +112,11 @@ namespace Firmament.Utils
             {
                 return;
             }
-            this.updateBallGridWithTask();
-            this.checkCollisionWithTask();
+            if (collections.Count > 0) {
+                this.updateBallGridWithTask();
+                this.checkCollisionWithTask();
+            }
+         
         }
 
         /**刷新小球所在格子 */
@@ -162,7 +166,7 @@ namespace Firmament.Utils
             // 初始化任务池
             tasks.Clear();
 
-            for (int l = 0; l < 100; l++)
+            for (int l = 0; l < collections.Count; l++)
             {
                 int currentl = l;
                 int everyCollectionCount = collections[currentl].Count;
@@ -178,7 +182,7 @@ namespace Firmament.Utils
                         {
                             //count++;
                             BaseElement ballB = list[j];
-                            if (ballA != ballB)
+                            if (ballA.tag != ballB.tag)
                             {
                                 if (this.rectRect(ballA, ballB))
                                 {
@@ -190,7 +194,6 @@ namespace Firmament.Utils
                                             MessageBox.Show("游戏结束");
                                         }
                                     });
-
                                 }
                             }
                         }
