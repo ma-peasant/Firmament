@@ -41,6 +41,8 @@ namespace Firmament
             this.Loaded += QuardTreeTestPage_Loaded; ;
         }
 
+        Object lockObject = new Object();
+
         private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
         {
             this.maxWidth = this.canvas.ActualWidth - 10;
@@ -92,15 +94,22 @@ namespace Firmament
         }
         public void Update()
         {
-            updateBallMove();
+            lock (lockObject) { 
+              updateBallMove();
+            }
             //需要计算小球的矩形情况
             this.updateBallGrid();
-            //this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            //{
-            //    this.AddLine(rootTree, rootTree.root, true);
-            //});
-            ////检查碰撞
-            this.checkCollision();
+            this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            {
+                this.AddLine(rootTree, rootTree.root, true);
+            });
+
+            lock (lockObject)
+            {
+                ////检查碰撞
+                this.checkCollision();
+            }
+           
             
         }
 
