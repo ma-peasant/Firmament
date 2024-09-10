@@ -22,6 +22,7 @@ namespace Firmament
 {
     /// <summary>
     /// EasyQuardTreeTestPage.xaml 的交互逻辑
+    /// 分配的格子是固定的，正确的做法是根据个数动态的进行空间的分配
     /// </summary>
     public partial class EasyQuardTreeTestPage : Page
     {
