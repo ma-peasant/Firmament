@@ -15,10 +15,11 @@ namespace Firmament.Module
 
         private CancellationTokenSource cancellation = new CancellationTokenSource();
         public Role() {
-           this.Width = 30;
-           this.Height = 30;
-           this.Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
-           this.Tag = "0";
+          this.image = new System.Windows.Controls.Image();
+          this.Width =  this.image.Width = 30;
+          this.Height =  this.image.Height = 30;
+           this.image.Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
+           this.Tag = 0;
         }
         public Rect getRec()
         {
@@ -44,7 +45,7 @@ namespace Firmament.Module
                 {
                     Common.mainPage.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
                     {
-                        Common.mainPage.canvas.Children.Remove(this);
+                        Common.mainPage.canvas.Children.Remove(this.image);
                         Common.ballList.Remove(this);
                     });
                 }

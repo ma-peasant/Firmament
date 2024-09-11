@@ -129,12 +129,11 @@ namespace Firmament
         /// <param name="e"></param>
         private void ArmyProductTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            Plan plan = new Plan();
+            quardTreeHelp.InsertElement(plan);
             this.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
-                Plan plan = new Plan();
-                plan.InitUpdateTimer();
-                canvas.Children.Add(plan);
-                quardTreeHelp.InsertElement(plan);
+                canvas.Children.Add(plan.image);
             });
         }
 
@@ -205,7 +204,7 @@ namespace Firmament
                     if (role != null)
                     {
                         Bullet bullet =  role.Shoot();
-                        canvas.Children.Add(bullet);
+                        canvas.Children.Add(bullet.image);
                         quardTreeHelp.InsertElement(bullet);
                     }
                 });
@@ -216,8 +215,8 @@ namespace Firmament
                 {
                     role.X = left;
                     role.Y = top;
-                    Canvas.SetLeft(role, role.X);
-                    Canvas.SetTop(role, role.Y);
+                    Canvas.SetLeft(role.image, role.X);
+                    Canvas.SetTop(role.image, role.Y);
                 }
             });
         }
@@ -227,13 +226,13 @@ namespace Firmament
         {
             //1、创建角色
             role = new Role();
-            canvas.Children.Add(role);
+            canvas.Children.Add(role.image);
             quardTreeHelp.InsertElement(role);
             role.X = canvas.ActualWidth / 2;
             role.Y = canvas.ActualHeight - 50;
             //2、让角色位于中间
-            Canvas.SetLeft(role, role.X);
-            Canvas.SetTop(role, role.Y);
+            Canvas.SetLeft(role.image, role.X);
+            Canvas.SetTop(role.image, role.Y);
             //3、启动定时器
             KeyDownTimer.Start();     //按键功能扫描
             ArmyProductTimer.Start(); //生产敌机扫描

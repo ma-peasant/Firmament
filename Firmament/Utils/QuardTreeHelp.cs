@@ -72,9 +72,101 @@ namespace Firmament.Utils
 
         private void updateBallGrid()
         {
-            rootTree.Update(this.ballList.ToList<BaseElement>());
+            //更新子弹和敌人的位置，不再单个控制
+            for (int i = 0; i < this.ballList.Count; i++)
+            {
+                if (ballList[i].Tag == 0)
+                {
+                    continue;
+                }
+                else {
+                    if (ballList[i].Tag == 1)
+                    {
+                        UpdatePlanPosition(ballList[i]);
+                    }
+                    else if(ballList[i].Tag == 2) {
+                        UpdateBulletPosition(ballList[i]);
+                    }
+                }
+            }
+
+                rootTree.Update(this.ballList.ToList<BaseElement>());
         }
 
+
+        private void UpdatePlanPosition(BaseElement baseElement) {
+            bool isOut = false;
+            baseElement.Y = baseElement.Y + baseElement.YSpeed;
+
+            //边缘检测 达到边缘后速度取反
+            if (baseElement.X + baseElement.Width / 2 > maxWidth || baseElement.X - baseElement.Width / 2 < 0 ||
+             baseElement.Y + baseElement.Height / 2 > maxHeight || baseElement.Y - baseElement.Height / 2 < 0)
+            {
+                isOut = true;
+            }
+
+            if (isOut)
+            {
+                //在UI和四叉树上移除该对象
+                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Common.ballList.Remove(baseElement);
+                    Common.mainPage.canvas.Children.Remove(baseElement.image);
+                });
+
+            }
+            else
+            {
+                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Canvas.SetLeft(baseElement.image, baseElement.X);
+                    Canvas.SetTop(baseElement.image, baseElement.Y);
+                });
+
+            }
+
+        }
+        private void UpdateBulletPosition(BaseElement baseElement) {
+            bool isout = false;
+
+            baseElement.Y -= baseElement.YSpeed;
+            //边缘检测 达到边缘后速度取反
+            if (baseElement.X + baseElement.Width / 2 > Common.mainPage.canvas.ActualWidth)
+            {
+                isout = true;
+            }
+            else if (baseElement.X - baseElement.Width / 2 < 0)
+            {
+                isout = true;
+            }
+            if (baseElement.Y + baseElement.Height / 2 > Common.mainPage.canvas.ActualHeight)
+            {
+                isout = true;
+            }
+            else if (baseElement.Y - baseElement.Height / 2 < 0)
+            {
+                isout = true;
+            }
+            if (isout)
+            {
+                //在UI和四叉树上移除该对象
+                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Common.ballList.Remove(baseElement);
+                    Common.mainPage.canvas.Children.Remove(baseElement.image);
+                });
+            }
+            else
+            {
+                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                {
+                    Canvas.SetLeft(baseElement.image, baseElement.X);
+                    Canvas.SetTop(baseElement.image, baseElement.Y);
+                });
+
+            }
+        }
+            
         private void checkCollision()
         {
             for (int i = 0; i < this.ballList.Count; i++)
@@ -93,7 +185,7 @@ namespace Firmament.Utils
                             {
                                 break;
                             }
-                            if ((ballA.Tag.ToString() == "0" && ballB.Tag.ToString() == "1") || (ballA.Tag.ToString() == "1" && ballB.Tag.ToString() == "2") || (ballA.Tag.ToString() == "1" && ballB.Tag.ToString() == "0") || (ballA.Tag.ToString() == "2" && ballB.Tag.ToString() == "1"))
+                            if ((ballA.Tag == 0 && ballB.Tag == 1) || (ballA.Tag == 1 && ballB.Tag == 2) || (ballA.Tag == 1 && ballB.Tag == 0) || (ballA.Tag == 2 && ballB.Tag == 1))
                             {
                                 if (this.rectRect(ballA, ballB))
                                 {
