@@ -17,13 +17,14 @@ namespace Firmament.Module
         private System.Timers.Timer timer = null;
         public Plan()
         {
-           control = new Image();
+             control = new Image();
             (control as Image).Width = 30;
             (control as Image).Height = 30;
             (control as Image).Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
             this.Width = 30;
             this.Height = 30;
             this.ySpeed = 3;
+            this.tag = 1;
 
             this.x = new Random().Next(10, 400);
             this.y = 30;
@@ -88,5 +89,27 @@ namespace Firmament.Module
         {
             updateBallMove();
         }
+
+        public override bool Hit_State
+        {
+            set
+            {
+                base.Hit_State = value;
+                if (base.Hit_State)
+                {
+                    Common.frmae.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Render, (ThreadStart)delegate
+                    {
+                        Common.frmae.canvas.Children.Remove(this.control);
+                        Common.ballList.Remove(this);
+                    });
+                }
+            }
+            get
+            {
+                return base.Hit_State;
+            }
+        }
+
+      
     }
 }

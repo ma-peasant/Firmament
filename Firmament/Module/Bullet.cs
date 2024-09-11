@@ -27,13 +27,18 @@ namespace Firmament.Module
             ((Rectangle)control).Fill = new SolidColorBrush(Colors.Red);
             (control as Rectangle).Width = 2;
             control.Height = 5;
+            this.Width = 2;
+            this.Height = 5;
+            this.ySpeed = 5;
+            this.tag = 2;
+
             this.x = role.x + 13;
             this.y = role.y;
-            Canvas.SetLeft((control as Rectangle), this.x);
-            Canvas.SetTop((control as Rectangle), this.y);
+       
+            Canvas.SetLeft(this.control, this.x);
+            Canvas.SetTop(this.control, this.y);
             this.maxWidth = Common.frmae.canvas.ActualWidth;
             this.maxHeight = Common.frmae.canvas.ActualHeight;
-            this.ySpeed = 5;
             InitUpdateTimer();
         }
 
@@ -65,14 +70,14 @@ namespace Firmament.Module
                 timer.Dispose();
                 //在UI和四叉树上移除该对象
                 Common.ballList.Remove(this);
-                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Render, (ThreadStart)delegate
                 {
                     Common.frmae.canvas.Children.Remove(this.control);
                 });
             }
             else
             {
-                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Render, (ThreadStart)delegate
                 {
                     Canvas.SetLeft(this.control, this.x);
                     Canvas.SetTop(this.control, this.y);
@@ -91,6 +96,26 @@ namespace Firmament.Module
         private void Timer_Tick(object sender, ElapsedEventArgs e)
         {
             updateBallMove();
+        }
+
+        public override bool Hit_State
+        {
+            set
+            {
+                base.Hit_State = value;
+                if (base.Hit_State)
+                {
+                    Common.frmae.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Render, (ThreadStart)delegate
+                    {
+                        Common.frmae.canvas.Children.Remove(this.control);
+                        Common.ballList.Remove(this);
+                    });
+                }
+            }
+            get
+            {
+                return base.Hit_State;
+            }
         }
     }
 }

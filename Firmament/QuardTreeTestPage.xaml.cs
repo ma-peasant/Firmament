@@ -3,18 +3,11 @@ using Firmament.Utils.QuardTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
@@ -35,13 +28,14 @@ namespace Firmament
         //界面边缘
         private double maxWidth;
         private double maxHeight;
+        Object lockObject = new Object();
         public QuardTreeTestPage()
         {
             InitializeComponent();
             this.Loaded += QuardTreeTestPage_Loaded; ;
         }
 
-        Object lockObject = new Object();
+      
 
         private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
         {
@@ -175,6 +169,7 @@ namespace Firmament
             {
                 try
                 {
+                    //flag相等的代表是一个节点的， 对同节点的进行判断。 
                     Ball ballA = this.ballList[i];
                     List<Ball> list = this.ballList.Where(ball=>ball.flag == ballA.flag).ToList();
                     if (list != null && list.Count > 0)

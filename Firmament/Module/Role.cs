@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Firmament.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,7 @@ namespace Firmament.Module
             (this.control as Image).Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
             this.Width = 30;
             this.Height = 30;
+            this.tag = 0;
         }
         public Rect getRec()
         {
@@ -34,14 +36,7 @@ namespace Firmament.Module
 
         public Bullet Shoot()
         {
-           
-            //Rectangle rectangle =  await new TaskFactory().StartNew(() =>
-            //{
-            //    Bullet bullet = new Bullet(this);
-            //    return bullet.rectangle;
-            //});
             Bullet bullet = new Bullet(this);
-            bullet.tag = 3;
             return bullet;
         }
 
@@ -56,10 +51,12 @@ namespace Firmament.Module
                 base.Hit_State = value;
                 if (base.Hit_State)
                 {
-                    MessageBox.Show("游戏结束");
-                }
-                else
-                {
+                    Common.frmae.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Render, (ThreadStart)delegate
+                    {
+                        Common.frmae.canvas.Children.Remove(this.control);
+                        Common.ballList.Remove(this);
+                    });
+                    //游戏结束
                 }
             }
             get

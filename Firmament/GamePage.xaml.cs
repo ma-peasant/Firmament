@@ -132,7 +132,6 @@ namespace Firmament
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
                 Plan plan = new Plan();
-                plan.tag = 1;
                 canvas.Children.Add(plan.control);
                 plan.Show(canvas.ActualWidth, canvas.ActualHeight);
                 quardTreeHelp.InsertElement(plan);
@@ -201,16 +200,17 @@ namespace Firmament
             }
             if (isSKeyPressed)
             {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                this.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
                     if (role != null)
                     {
-                        canvas.Children.Add(role.Shoot().control);
-                        quardTreeHelp.InsertElement(role.Shoot());
+                        Bullet bullet =  role.Shoot();
+                        canvas.Children.Add(bullet.control);
+                        quardTreeHelp.InsertElement(bullet);
                     }
                 });
             }
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            this.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
                 if (role != null)
                 {
@@ -227,7 +227,6 @@ namespace Firmament
         {
             //1、创建角色
             role = new Role();
-            role.tag = 0;
             canvas.Children.Add(role.control);
             quardTreeHelp.InsertElement(role);
             role.x = canvas.ActualWidth / 2;
