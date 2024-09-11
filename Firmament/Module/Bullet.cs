@@ -1,15 +1,9 @@
 ﻿using Firmament.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Timers;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace Firmament.Module
@@ -20,25 +14,18 @@ namespace Firmament.Module
     public class Bullet: BaseElement
     {
         private System.Timers.Timer timer = null;
-        private double maxWidth, maxHeight;
-        public Bullet(Role role)
-        {
-            control = new Rectangle();
-            ((Rectangle)control).Fill = new SolidColorBrush(Colors.Red);
-            (control as Rectangle).Width = 2;
-            control.Height = 5;
-            this.Width = 2;
-            this.Height = 5;
-            this.ySpeed = 5;
-            this.tag = 2;
-
-            this.x = role.x + 13;
-            this.y = role.y;
-       
-            Canvas.SetLeft(this.control, this.x);
-            Canvas.SetTop(this.control, this.y);
-            this.maxWidth = Common.frmae.canvas.ActualWidth;
-            this.maxHeight = Common.frmae.canvas.ActualHeight;
+        public Bullet(Role role) { 
+            this.Source = new BitmapImage(new Uri("./Images/bullet.png", UriKind.Relative));
+            this.Width = 6;
+            this.Height = 10;
+            this.YSpeed = 5;
+            this.Tag = 2;
+            this.X = role.X + 13;
+            this.Y = role.Y;
+            this.Stretch = System.Windows.Media.Stretch.UniformToFill;
+            Canvas.SetLeft(this, this.X);
+            Canvas.SetTop(this, this.Y);
+           
             InitUpdateTimer();
         }
 
@@ -46,21 +33,21 @@ namespace Firmament.Module
         {
             bool isout = false;
 
-            this.y -= this.ySpeed;
+            this.Y -= this.YSpeed;
             //边缘检测 达到边缘后速度取反
-            if (this.x + this.Width / 2 > this.maxWidth)
+            if (this.X + this.Width / 2 > Common.mainPage.canvas.ActualWidth)
             {
                 isout = true;
             }
-            else if (this.x - this.Width / 2 < 0)
+            else if (this.X - this.Width / 2 < 0)
             {
                 isout = true;
             }
-            if (this.y + this.Height / 2 > this.maxHeight)
+            if (this.Y + this.Height / 2 > Common.mainPage.canvas.ActualHeight)
             {
                 isout = true;
             }
-            else if (this.y - this.Height / 2 < 0)
+            else if (this.Y - this.Height / 2 < 0)
             {
                 isout = true;
             }
@@ -70,18 +57,12 @@ namespace Firmament.Module
                 timer.Dispose();
                 //在UI和四叉树上移除该对象
                 Common.ballList.Remove(this);
-                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Render, (ThreadStart)delegate
-                {
-                    Common.frmae.canvas.Children.Remove(this.control);
-                });
+                Common.mainPage.canvas.Children.Remove(this);
             }
             else
             {
-                Common.frmae.Dispatcher.Invoke(DispatcherPriority.Render, (ThreadStart)delegate
-                {
-                    Canvas.SetLeft(this.control, this.x);
-                    Canvas.SetTop(this.control, this.y);
-                });
+                Canvas.SetLeft(this, this.X);
+                Canvas.SetTop(this, this.Y);
             }
 
         }
@@ -95,26 +76,29 @@ namespace Firmament.Module
 
         private void Timer_Tick(object sender, ElapsedEventArgs e)
         {
-            updateBallMove();
+            Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            {
+                updateBallMove();
+            });
+           
         }
 
-        public override bool Hit_State
-        {
+        public override bool HitState {
             set
             {
-                base.Hit_State = value;
-                if (base.Hit_State)
+                base.HitState = value;
+                if (value)
                 {
-                    Common.frmae.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Render, (ThreadStart)delegate
+                    Common.mainPage.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
                     {
-                        Common.frmae.canvas.Children.Remove(this.control);
+                        Common.mainPage.canvas.Children.Remove(this);
                         Common.ballList.Remove(this);
                     });
                 }
             }
             get
             {
-                return base.Hit_State;
+                return base.HitState;
             }
         }
     }

@@ -1,29 +1,29 @@
-﻿using Firmament.Module;
+﻿using QuardTreeProject.Module;
 using System.Collections.Generic;
 using System.Windows;
-namespace Firmament.Utils.QuardTree
+namespace QuardTreeProject.Utils.QuardTree
 {
     // 定义四叉树
-    public class QuadTree<T> where T : IBaseElement
+    public class QuadTree
     {
-        public  QuadTreeNode<T> root;
+        public  QuadTreeNode root;
         public int MaxCount = 10;  //默认是10
         //用于给节点设置flag
         public int flag = 0;
         public QuadTree(Rect rect ,int maxCount)
         {
             this.MaxCount = maxCount;
-            root = new QuadTreeNode<T>(rect,flag++);
+            root = new QuadTreeNode(rect,flag++);
         }
 
         // 将对象插入四叉树
-        public void Insert(T obj)
+        public void Insert(Ball obj)
         {
             InsertObject(root, obj);
         }
 
         // 递归插入对象到指定节点或子节点
-        private void InsertObject(QuadTreeNode<T> node, T obj)
+        private void InsertObject(QuadTreeNode node, Ball obj)
         {
             // 检查对象是否在节点范围内
             if (!IsObjectInBounds(node.Bounds, obj))
@@ -56,17 +56,17 @@ namespace Firmament.Utils.QuardTree
         }
 
         // 划分节点为四个子节点
-        private void SplitNode(QuadTreeNode<T> node)
+        private void SplitNode(QuadTreeNode node)
         {
             double subWidth = node.Bounds.Width / 2;
             double subHeight = node.Bounds.Height / 2;
             double x = node.Bounds.X;
             double y = node.Bounds.Y;
 
-            node.Children.Add(new QuadTreeNode<T>(new Rect { X = x + subWidth, Y = y, Width = subWidth, Height = subHeight }, this.flag++));
-            node.Children.Add(new QuadTreeNode<T>(new Rect { X = x, Y = y, Width = subWidth, Height = subHeight }, flag++));
-            node.Children.Add(new QuadTreeNode<T>(new Rect { X = x, Y = y + subHeight, Width = subWidth, Height = subHeight }, flag++));
-            node.Children.Add(new QuadTreeNode<T>(new Rect { X = x + subWidth, Y = y + subHeight, Width = subWidth, Height = subHeight }, flag++));
+            node.Children.Add(new QuadTreeNode(new Rect { X = x + subWidth, Y = y, Width = subWidth, Height = subHeight }, this.flag++));
+            node.Children.Add(new QuadTreeNode(new Rect { X = x, Y = y, Width = subWidth, Height = subHeight }, flag++));
+            node.Children.Add(new QuadTreeNode(new Rect { X = x, Y = y + subHeight, Width = subWidth, Height = subHeight }, flag++));
+            node.Children.Add(new QuadTreeNode(new Rect { X = x + subWidth, Y = y + subHeight, Width = subWidth, Height = subHeight }, flag++));
             // 将当前节点的对象重新插入到子节点
             foreach (var obj in node.Objects)
             {
@@ -77,7 +77,7 @@ namespace Firmament.Utils.QuardTree
         }
 
         // 检查对象是否在边界框内
-        private bool IsObjectInBounds(Rect bounds, T obj)
+        private bool IsObjectInBounds(Rect bounds, Ball obj)
         {
             return obj.X >= bounds.X &&
                    obj.Y >= bounds.Y &&
@@ -88,7 +88,7 @@ namespace Firmament.Utils.QuardTree
         /// <summary>
         /// 更新节点状态
         /// </summary>
-        public void Update(List<T> list)
+        public void Update(List<Ball> list)
         {
             flag = 0;
             //1、清理四叉树节点
@@ -97,14 +97,14 @@ namespace Firmament.Utils.QuardTree
             RebuildTree(root, list);
         }
 
-        private void ClearTree(QuadTreeNode<T> node)
+        private void ClearTree(QuadTreeNode node)
         {
             node.Clear(true);
         }
 
-        private void RebuildTree(QuadTreeNode<T> node, List<T> list)
+        private void RebuildTree(QuadTreeNode node, List<Ball> list)
         {
-            foreach (T obj in list)
+            foreach (Ball obj in list)
             {
                 InsertObject(node,obj);
             }
@@ -120,22 +120,22 @@ namespace Firmament.Utils.QuardTree
         /// <summary>
         /// 删除节点
         /// </summary>
-        public void delete(T rec)
+        public void delete(Ball rec)
         {
             deleteNode(root, rec);
         }
 
-        public void deleteNode(QuadTreeNode<T> node, T rec)
+        public void deleteNode(QuadTreeNode node, Ball rec)
         {
-            foreach (T rect in node.Objects)
+            foreach (Ball rect in node.Objects)
             {
-                if (EqualityComparer<T>.Default.Equals(rec, rect))
+                if (rec == rect)
                 {
                     root.Objects.Remove(rect);
                     return;
                 }
             }
-            foreach (QuadTreeNode<T> qrNode in node.Children)
+            foreach (QuadTreeNode qrNode in node.Children)
             {
 
                 if (qrNode != null)

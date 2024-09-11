@@ -129,11 +129,11 @@ namespace Firmament
         /// <param name="e"></param>
         private void ArmyProductTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            this.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
                 Plan plan = new Plan();
-                canvas.Children.Add(plan.control);
-                plan.Show(canvas.ActualWidth, canvas.ActualHeight);
+                plan.InitUpdateTimer();
+                canvas.Children.Add(plan);
                 quardTreeHelp.InsertElement(plan);
             });
         }
@@ -145,8 +145,8 @@ namespace Firmament
         /// <param name="e"></param>
         private void KeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            double left = role.x;
-            double top = role.y;
+            double left = role.X;
+            double top = role.Y;
             if (isLeftKeyPressed)
             {
                 left = left - 10;
@@ -205,7 +205,7 @@ namespace Firmament
                     if (role != null)
                     {
                         Bullet bullet =  role.Shoot();
-                        canvas.Children.Add(bullet.control);
+                        canvas.Children.Add(bullet);
                         quardTreeHelp.InsertElement(bullet);
                     }
                 });
@@ -214,10 +214,10 @@ namespace Firmament
             {
                 if (role != null)
                 {
-                    role.x = left;
-                    role.y = top;
-                    Canvas.SetLeft(role.control, role.x);
-                    Canvas.SetTop(role.control, role.y);
+                    role.X = left;
+                    role.Y = top;
+                    Canvas.SetLeft(role, role.X);
+                    Canvas.SetTop(role, role.Y);
                 }
             });
         }
@@ -227,13 +227,13 @@ namespace Firmament
         {
             //1、创建角色
             role = new Role();
-            canvas.Children.Add(role.control);
+            canvas.Children.Add(role);
             quardTreeHelp.InsertElement(role);
-            role.x = canvas.ActualWidth / 2;
-            role.y = canvas.ActualHeight - 50;
+            role.X = canvas.ActualWidth / 2;
+            role.Y = canvas.ActualHeight - 50;
             //2、让角色位于中间
-            Canvas.SetLeft(role.control, role.x);
-            Canvas.SetTop(role.control, role.y);
+            Canvas.SetLeft(role, role.X);
+            Canvas.SetTop(role, role.Y);
             //3、启动定时器
             KeyDownTimer.Start();     //按键功能扫描
             ArmyProductTimer.Start(); //生产敌机扫描

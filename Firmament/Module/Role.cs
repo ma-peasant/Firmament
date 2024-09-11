@@ -1,15 +1,9 @@
 ﻿using Firmament.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Firmament.Module
@@ -21,17 +15,14 @@ namespace Firmament.Module
 
         private CancellationTokenSource cancellation = new CancellationTokenSource();
         public Role() {
-            this.control  = new Image();
-            (this.control as Image).Width = 30;
-            (this.control as Image).Height = 30;
-            (this.control as Image).Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
-            this.Width = 30;
-            this.Height = 30;
-            this.tag = 0;
+           this.Width = 30;
+           this.Height = 30;
+           this.Source = new BitmapImage(new Uri("./Images/plan1.png", UriKind.Relative));
+           this.Tag = "0";
         }
         public Rect getRec()
         {
-            return new Rect(this.x, this.y, 30, 30);
+            return new Rect(this.X, this.Y, 30, 30);
         }
 
         public Bullet Shoot()
@@ -44,24 +35,23 @@ namespace Firmament.Module
         {
             cancellation?.Cancel();
         }
-        public override bool Hit_State
+        public override bool HitState
         {
             set
             {
-                base.Hit_State = value;
-                if (base.Hit_State)
+                base.HitState = value;
+                if (value)
                 {
-                    Common.frmae.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Render, (ThreadStart)delegate
+                    Common.mainPage.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
                     {
-                        Common.frmae.canvas.Children.Remove(this.control);
+                        Common.mainPage.canvas.Children.Remove(this);
                         Common.ballList.Remove(this);
                     });
-                    //游戏结束
                 }
             }
             get
             {
-                return base.Hit_State;
+                return base.HitState;
             }
         }
     }

@@ -1,5 +1,5 @@
-﻿using Firmament.Module;
-using Firmament.Utils.QuardTree;
+﻿using QuardTreeProject.Module;
+using QuardTreeProject.Utils.QuardTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace Firmament
+namespace QuardTreeProject
 {
     /// <summary>
     /// QuardTreeTestPage.xaml 的交互逻辑
@@ -32,11 +32,8 @@ namespace Firmament
         public QuardTreeTestPage()
         {
             InitializeComponent();
-            this.Loaded += QuardTreeTestPage_Loaded; ;
+            this.Loaded += QuardTreeTestPage_Loaded;
         }
-
-      
-
         private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
         {
             this.maxWidth = this.canvas.ActualWidth - 10;
@@ -61,13 +58,13 @@ namespace Firmament
             {
                 //随机位置
                 Ball ball = new Ball();
-                ball.x = random.NextDouble() * this.maxWidth;
-                ball.y = random.NextDouble() * this.maxHeight;
-                Canvas.SetLeft(ball.control, ball.x);
-                Canvas.SetTop(ball.control, ball.y);
+                ball.X = random.NextDouble() * this.maxWidth;
+                ball.Y = random.NextDouble() * this.maxHeight;
+                Canvas.SetLeft(ball.control, ball.X);
+                Canvas.SetTop(ball.control, ball.Y);
                 //随机速度
-                ball.xSpeed = random.NextDouble() * ball.speed;
-                ball.ySpeed = random.NextDouble() * ball.speed;
+                ball.XSpeed = random.NextDouble() * ball.Speed;
+                ball.YSpeed = random.NextDouble() * ball.Speed;
                 this.rootTree.Insert(ball);
                 ballList.Add(ball);
                 this.canvas.Children.Add(ball.control);
@@ -103,22 +100,18 @@ namespace Firmament
                 ////检查碰撞
                 this.checkCollision();
             }
-           
-            
         }
 
         private void updateBallGrid()
         {
-            rootTree.Update(this.ballList.ToList<BaseElement>());
-
+            rootTree.Update(this.ballList.ToList<Ball>());
             //将小球置蓝色，重新计算小球所属行列的格子
             for (int i = 0; i < this.ballList.Count; i++)
             {
                 Ball ball = this.ballList[i];
                 this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
-                    ball.Hit_State = false;
-                    //ball.rectangle.Fill = new SolidColorBrush(Colors.Blue);
+                    ball.HitState = false;
                 });
             }
         }
@@ -131,33 +124,33 @@ namespace Firmament
             {
                 ball = ballList[i];
                 //移动
-                ball.x += ball.xSpeed;
-                ball.y += ball.ySpeed;
+                ball.X += ball.XSpeed;
+                ball.Y += ball.YSpeed;
                 //边缘检测 达到边缘后速度取反
-                if (ball.x + ball.Width / 2 > this.maxWidth)
+                if (ball.X + ball.Width / 2 > this.maxWidth)
                 {
-                    ball.x = this.maxWidth - ball.Width / 2;
-                    ball.xSpeed = -ball.speed;
+                    ball.X = this.maxWidth - ball.Width / 2;
+                    ball.XSpeed = -ball.Speed;
                 }
-                else if (ball.x - ball.Width / 2 < 0)
+                else if (ball.X - ball.Width / 2 < 0)
                 {
-                    ball.x = ball.Width / 2;
-                    ball.xSpeed = ball.speed;
+                    ball.X = ball.Width / 2;
+                    ball.XSpeed = ball.Speed;
                 }
-                if (ball.y + ball.Height / 2 > this.maxHeight)
+                if (ball.Y + ball.Height / 2 > this.maxHeight)
                 {
-                    ball.y = this.maxHeight - ball.Height / 2;
-                    ball.ySpeed = -ball.speed;
+                    ball.Y = this.maxHeight - ball.Height / 2;
+                    ball.YSpeed = -ball.Speed;
                 }
-                else if (ball.y - ball.Height / 2 < 0)
+                else if (ball.Y - ball.Height / 2 < 0)
                 {
-                    ball.y = ball.Height / 2;
-                    ball.ySpeed = ball.speed;
+                    ball.Y = ball.Height / 2;
+                    ball.YSpeed = ball.Speed;
                 }
                 this.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
                 {
-                    Canvas.SetLeft(ball.control, ball.x);
-                    Canvas.SetTop(ball.control, ball.y);
+                    Canvas.SetLeft(ball.control, ball.X);
+                    Canvas.SetTop(ball.control, ball.Y);
                 });
             }
         }
@@ -171,7 +164,7 @@ namespace Firmament
                 {
                     //flag相等的代表是一个节点的， 对同节点的进行判断。 
                     Ball ballA = this.ballList[i];
-                    List<Ball> list = this.ballList.Where(ball=>ball.flag == ballA.flag).ToList();
+                    List<Ball> list = this.ballList.Where(ball=>ball.Flag == ballA.Flag).ToList();
                     if (list != null && list.Count > 0)
                     {
                         for (int j = 0; j < list.Count; j++)
@@ -186,8 +179,8 @@ namespace Firmament
                                 {
                                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
                                     {
-                                        ballA.Hit_State = true;
-                                        ballB.Hit_State = true;
+                                        ballA.HitState = true;
+                                        ballB.HitState = true;
                                         //ballA.rectangle.Fill = new SolidColorBrush(Colors.Red);
                                         //ballB.rectangle.Fill = new SolidColorBrush(Colors.Red);
 
@@ -208,10 +201,7 @@ namespace Firmament
                 catch (InvalidOperationException e) {
                     Console.WriteLine(e.Message);
                 }
-               
-                
             }
-            //Console.WriteLine("检查次数:", count);
         }
 
         /**
@@ -222,14 +212,14 @@ namespace Firmament
          */
         private bool rectRect(Ball a, Ball b)
         {
-            var a_min_x = a.x - a.Width / 2;
-            var a_min_y = a.y - a.Height / 2;
-            var a_max_x = a.x + a.Width / 2;
-            var a_max_y = a.y + a.Height / 2;
-            var b_min_x = b.x - b.Width / 2;
-            var b_min_y = b.y - b.Height / 2;
-            var b_max_x = b.x + b.Width / 2;
-            var b_max_y = b.y + b.Height / 2;
+            var a_min_x = a.X - a.Width / 2;
+            var a_min_y = a.Y - a.Height / 2;
+            var a_max_x = a.X + a.Width / 2;
+            var a_max_y = a.Y + a.Height / 2;
+            var b_min_x = b.X - b.Width / 2;
+            var b_min_y = b.Y - b.Height / 2;
+            var b_max_x = b.X + b.Width / 2;
+            var b_max_y = b.Y + b.Height / 2;
             return a_min_x <= b_max_x && a_max_x >= b_min_x && a_min_y <= b_max_y && a_max_y >= b_min_y;
         }
 

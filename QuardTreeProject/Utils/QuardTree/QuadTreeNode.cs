@@ -1,11 +1,11 @@
-﻿using Firmament.Module;
+﻿using QuardTreeProject.Module;
 using System.Collections.Generic;
 using System.Windows;
 
-namespace Firmament.Utils.QuardTree
+namespace QuardTreeProject.Utils.QuardTree
 {
     // 定义四叉树节点
-    public class QuadTreeNode<T> where T : IBaseElement
+    public class QuadTreeNode
     {
         //自身的边界
         public Rect Bounds { get; set; }
@@ -14,9 +14,9 @@ namespace Firmament.Utils.QuardTree
         public int flag { get; set; }    //节点的标记，处于该节点下的objects的flag保持一致
 
 
-        private List<T> objectList;
+        private List<Ball> objectList;
         //自身存在的矩形个数
-        public List<T> Objects {
+        public List<Ball> Objects {
             get{ return objectList; }
             set {
                 objectList = value;
@@ -24,13 +24,13 @@ namespace Firmament.Utils.QuardTree
         }
 
         //子节点分区
-        public List<QuadTreeNode<T>> Children { get; set; }
+        public List<QuadTreeNode> Children { get; set; }
 
         public QuadTreeNode(Rect bounds ,int flag)
         {
             Bounds = bounds;
-            Objects = new List<T>();
-            Children = new List<QuadTreeNode<T>>();
+            Objects = new List<Ball>();
+            Children = new List<QuadTreeNode>();
             IsLeaf = true;
             this.flag = flag;
         }
@@ -38,7 +38,7 @@ namespace Firmament.Utils.QuardTree
             if (!isRoot) {
                 Objects = null;
             }
-            foreach(QuadTreeNode<T> node in Children){
+            foreach(QuadTreeNode node in Children){
                 node.Clear(false);
             }
             Children.Clear();

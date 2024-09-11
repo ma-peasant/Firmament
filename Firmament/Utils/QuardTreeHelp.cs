@@ -3,10 +3,7 @@ using Firmament.Utils.QuardTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -19,7 +16,7 @@ namespace Firmament.Utils
         /**小球列表 */
         private List<BaseElement> ballList;
         private int interval = 100;
-        QuadTree rootTree;
+        QuadTree<BaseElement> rootTree;
         private const int MaxCount = 10;
         //界面边缘
         private double maxWidth;
@@ -35,7 +32,7 @@ namespace Firmament.Utils
             //舞台边缘值
             this.maxWidth = canvas.ActualWidth - 10;
             this.maxHeight = canvas.ActualHeight - 10;
-            rootTree = new QuadTree(new Rect(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight), MaxCount);
+            rootTree = new QuadTree<BaseElement>(new Rect(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight), MaxCount);
         }
 
 
@@ -56,16 +53,21 @@ namespace Firmament.Utils
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            //需要计算小球的矩形情况
-            lock (lockObject) { 
-                this.updateBallGrid();
-            }
-
-            lock (lockObject)
+            Common.mainPage.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
-                ////检查碰撞
-                this.checkCollision();
-            }
+                //需要计算小球的矩形情况
+                lock (lockObject)
+                {
+                    this.updateBallGrid();
+                }
+
+                lock (lockObject)
+                {
+                    ////检查碰撞
+                    this.checkCollision();
+                }
+            });
+           
         }
 
         private void updateBallGrid()
@@ -81,7 +83,7 @@ namespace Firmament.Utils
                 {
                     //flag相等的代表是一个节点的， 对同节点的进行判断。 
                     BaseElement ballA = this.ballList[i];
-                    List<BaseElement> list = this.ballList.Where(ball => ball.flag == ballA.flag).ToList();
+                    List<BaseElement> list = this.ballList.Where(ball => ball.Flag == ballA.Flag).ToList();
                     if (list != null && list.Count > 0)
                     {
                         for (int j = 0; j < list.Count; j++)
@@ -91,12 +93,12 @@ namespace Firmament.Utils
                             {
                                 break;
                             }
-                            if ((ballA.tag == 0 && ballB.tag == 1) || (ballA.tag == 1 && ballB.tag == 2) || (ballA.tag == 1 && ballB.tag == 0) || (ballA.tag == 2 && ballB.tag == 1))
+                            if ((ballA.Tag.ToString() == "0" && ballB.Tag.ToString() == "1") || (ballA.Tag.ToString() == "1" && ballB.Tag.ToString() == "2") || (ballA.Tag.ToString() == "1" && ballB.Tag.ToString() == "0") || (ballA.Tag.ToString() == "2" && ballB.Tag.ToString() == "1"))
                             {
                                 if (this.rectRect(ballA, ballB))
                                 {
-                                    ballA.Hit_State = true;
-                                    ballB.Hit_State = true;
+                                    ballA.HitState = true;
+                                    ballB.HitState = true;
                                 }
                             }
                         }
@@ -124,14 +126,14 @@ namespace Firmament.Utils
          */
         private bool rectRect(BaseElement a, BaseElement b)
         {
-            var a_min_x = a.x - a.Width / 2;
-            var a_min_y = a.y - a.Height / 2;
-            var a_max_x = a.x + a.Width / 2;
-            var a_max_y = a.y + a.Height / 2;
-            var b_min_x = b.x - b.Width / 2;
-            var b_min_y = b.y - b.Height / 2;
-            var b_max_x = b.x + b.Width / 2;
-            var b_max_y = b.y + b.Height / 2;
+            var a_min_x = a.X - a.Width / 2;
+            var a_min_y = a.Y - a.Height / 2;
+            var a_max_x = a.X + a.Width / 2;
+            var a_max_y = a.Y + a.Height / 2;
+            var b_min_x = b.X - b.Width / 2;
+            var b_min_y = b.Y - b.Height / 2;
+            var b_max_x = b.X + b.Width / 2;
+            var b_max_y = b.Y + b.Height / 2;
             return a_min_x <= b_max_x && a_max_x >= b_min_x && a_min_y <= b_max_y && a_max_y >= b_min_y;
         }
     }
