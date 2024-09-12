@@ -67,6 +67,7 @@
     <Compile Include="SudokuGamePage.xaml.cs">
       <DependentUpon>SudokuGamePage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\InputHandler.cs" />
     <Compile Include="Utils\QuardTreeHelp.cs" />
     <Compile Include="Utils\Common.cs" />
     <Compile Include="Utils\QuardTree\QuadTree.cs" />

@@ -14,5 +14,7 @@ namespace Firmament.Utils
         }
 
         public static List<BaseElement> ballList;
+
+        public static QuardTreeHelp quardTreeHelp;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Firmament.Module;
 using Firmament.Utils;
+using System;
 using System.Threading;
 using System.Timers;
 using System.Windows;
@@ -14,15 +15,9 @@ namespace Firmament
     /// </summary>
     public partial class GamePage : Page
     {
+        //应该把这些都放到Common里面去， 包括产生敌机
+        private InputHandler _inputHandler;
         Role role = null;
-        bool isSKeyPressed = false;
-        bool isLeftKeyPressed = false;
-        bool isRightKeyPressed = false;
-        bool isUpKeyPressed = false;
-        bool isDownKeyPressed = false;
-
-        //开一个定时器 ，专门处理按钮点击
-        System.Timers.Timer KeyDownTimer;
 
         //开一个定时器 ，生产敌机
         System.Timers.Timer ArmyProductTimer;
@@ -31,75 +26,33 @@ namespace Firmament
         public GamePage()
         {
             InitializeComponent();
+            // 实例化 InputHandler
             this.Loaded += QuardTreeTestPage_Loaded; ;
         }
 
         private void GamePage_PreviewKeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.S)
-            {
-                isSKeyPressed = false;
-            }
-            if (e.Key == Key.Left)
-            {
-                isLeftKeyPressed = false;
-            }
-            if (e.Key == Key.Right)
-            {
-                isRightKeyPressed = false;
-            }
-            if (e.Key == Key.Up)
-            {
-                isUpKeyPressed = false;
-            }
-            if (e.Key == Key.Down)
-            {
-                isDownKeyPressed = false;
-            }
+            _inputHandler.HandleKeyUp(e); // 将按键事件传递给 InputHandler
+          
             e.Handled = true;
         }
-
         private void GamePage_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Left)
-            {
-                isLeftKeyPressed = true;
-            }
-            if (e.Key == Key.Right)
-            {
-                isRightKeyPressed = true;
-            }
-            if (e.Key == Key.Up)
-            {
-                isUpKeyPressed = true;
-            }
-            if (e.Key == Key.Down)
-            {
-                isDownKeyPressed = true;
-            }
-            if (e.Key == Key.S)
-            {
-                isSKeyPressed = true;
-            }
+            Console.WriteLine(e.Key.ToString()  + ":" + e.ImeProcessedKey.ToString());
+            _inputHandler.HandleKeyDown(e); // 将按键事件传递给 InputHandler
             e.Handled = true;
         }
 
         private void QuardTreeTestPage_Loaded(object sender, RoutedEventArgs e)
         {
-            InitKeyDownTimer();
+            _inputHandler = new InputHandler();
             InitArmyProductTimer();
             quardTreeHelp = new QuardTreeHelp(this.canvas);
+            Common.quardTreeHelp = quardTreeHelp;
         }
 
         #region 定时器初始化
-        private void InitKeyDownTimer()
-        {
-            KeyDownTimer = new System.Timers.Timer();
-            KeyDownTimer.Interval = 100; // 计时器间隔为 100 毫秒
-            KeyDownTimer.AutoReset = true;
-            KeyDownTimer.Elapsed += KeyDownTimer_Elapsed;
-        }
-
+      
         private void InitArmyProductTimer()
         {
             ArmyProductTimer = new System.Timers.Timer();
@@ -122,89 +75,6 @@ namespace Firmament
             });
         }
 
-        /// <summary>
-        /// 按键处理程序
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void KeyDownTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            double left = role.X;
-            double top = role.Y;
-            if (isLeftKeyPressed)
-            {
-                left = left - 10;
-                if (left <= 0)
-                {
-                    left = 0;
-                }
-                else if (left >= canvas.ActualWidth - 30)
-                {
-                    left = canvas.ActualWidth - 30;
-                }
-            }
-            if (isRightKeyPressed)
-            {
-                isRightKeyPressed = true;
-                left = left + 10;
-                if (left <= 0)
-                {
-                    left = 0;
-                }
-                else if (left >= canvas.ActualWidth - 30)
-                {
-                    left = canvas.ActualWidth - 30;
-                }
-            }
-            if (isUpKeyPressed)
-            {
-                isUpKeyPressed = true;
-                top = top - 10;
-                if (top <= 0)
-                {
-                    top = 0;
-                }
-                else if (top >= canvas.ActualHeight - 30)
-                {
-                    top = canvas.ActualHeight - 30;
-                }
-            }
-            if (isDownKeyPressed)
-            {
-                isDownKeyPressed = true;
-                top = top + 10;
-                if (top <= 0)
-                {
-                    top = 0;
-                }
-                else if (top >= canvas.ActualHeight - 30)
-                {
-                    top = canvas.ActualHeight - 30;
-                }
-            }
-            if (isSKeyPressed)
-            {
-                this.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    if (role != null)
-                    {
-                        Bullet bullet =  role.Shoot();
-                        canvas.Children.Add(bullet.image);
-                        quardTreeHelp.InsertElement(bullet);
-                    }
-                });
-            }
-            this.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-            {
-                if (role != null)
-                {
-                    role.X = left;
-                    role.Y = top;
-                    Canvas.SetLeft(role.image, role.X);
-                    Canvas.SetTop(role.image, role.Y);
-                }
-            });
-        }
         #endregion
 
         private bool isStart = false;
@@ -227,7 +97,7 @@ namespace Firmament
 
         //游戏暂停
         private void GameSuspend() {
-            KeyDownTimer.Stop();
+            role.KeyDownTimer.Stop();
             ArmyProductTimer.Stop();
             quardTreeHelp.Suspend();
         }
@@ -235,7 +105,7 @@ namespace Firmament
         private void GameStart() {
             if (role == null) {
                 //1、创建角色
-                role = new Role();
+                role = new Role(_inputHandler);
                 role.GameOverEvent += Role_GameOverEvent; ;
                 canvas.Children.Add(role.image);
                 quardTreeHelp.InsertElement(role);
@@ -246,7 +116,6 @@ namespace Firmament
                 Canvas.SetTop(role.image, role.Y);
             }
             //3、启动定时器
-            KeyDownTimer.Start();     //按键功能扫描
             ArmyProductTimer.Start(); //生产敌机扫描
             //4、检测碰撞
             quardTreeHelp.Start();
@@ -255,10 +124,11 @@ namespace Firmament
         private void Role_GameOverEvent()
         {
             //1、游戏结束， 将role清除
+            role.KeyDownTimer.Stop();
             role.GameOverEvent -= Role_GameOverEvent;
             role = null;
             //停止定时器
-            KeyDownTimer.Stop();
+          
             ArmyProductTimer.Stop();
             quardTreeHelp.Stop();
             this.canvas.Children.Clear();
