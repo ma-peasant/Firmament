@@ -13,6 +13,7 @@ namespace Firmament.Utils
     //检测碰撞
     public class QuardTreeHelp
     {
+        System.Timers.Timer timer;
         /**小球列表 */
         private List<BaseElement> ballList;
         private int interval = 100;
@@ -35,42 +36,51 @@ namespace Firmament.Utils
             rootTree = new QuadTree<BaseElement>(new Rect(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight), MaxCount);
         }
 
-
         public void InsertElement(BaseElement baseElement)
         {
             ballList.Add(baseElement);
             this.rootTree.Insert(baseElement);
         }
 
-
-        public void InitUpdateTimer()
+        public void Start()
         {
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = this.interval; // 更新间隔，可以根据需要调整   大概就是30帧
-            timer.Elapsed += Timer_Tick; ;
-            timer.Start();
+            if (timer == null) {
+                timer = new System.Timers.Timer();
+                timer.Interval = this.interval; // 更新间隔，可以根据需要调整   大概就是30帧
+                timer.Elapsed += Timer_Tick; ;
+                timer.Start();
+            }
+            else
+            {
+                timer.Start();
+            }
+        }
+        //暂停
+        public void Suspend()
+        {
+            timer.Stop();
+        }
+        public void Stop() {
+            timer.Stop();
+            this.ballList.Clear();
+            Common.ballList.Clear();
+            //四叉树不用动， 更新角色位置的时候会根据ballList重新计算的
         }
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            Common.mainPage.canvas.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
+            //需要计算小球的矩形情况
+            lock (lockObject)
             {
-                //需要计算小球的矩形情况
-                lock (lockObject)
-                {
-                    this.updateBallGrid();
-                }
-
-                lock (lockObject)
-                {
-                    ////检查碰撞
-                    this.checkCollision();
-                }
-            });
-           
+                this.UpdateRolePositon();
+                ////检查碰撞
+                this.CheckCollision();
+            }
         }
-
-        private void updateBallGrid()
+        /// <summary>
+        /// 更新各种角色位置
+        /// </summary>
+        private void UpdateRolePositon()
         {
             //更新子弹和敌人的位置，不再单个控制
             for (int i = 0; i < this.ballList.Count; i++)
@@ -89,8 +99,7 @@ namespace Firmament.Utils
                     }
                 }
             }
-
-                rootTree.Update(this.ballList.ToList<BaseElement>());
+            rootTree.Update(this.ballList.ToList<BaseElement>());
         }
 
 
@@ -122,9 +131,7 @@ namespace Firmament.Utils
                     Canvas.SetLeft(baseElement.image, baseElement.X);
                     Canvas.SetTop(baseElement.image, baseElement.Y);
                 });
-
             }
-
         }
         private void UpdateBulletPosition(BaseElement baseElement) {
             bool isout = false;
@@ -163,11 +170,10 @@ namespace Firmament.Utils
                     Canvas.SetLeft(baseElement.image, baseElement.X);
                     Canvas.SetTop(baseElement.image, baseElement.Y);
                 });
-
             }
         }
             
-        private void checkCollision()
+        private void CheckCollision()
         {
             for (int i = 0; i < this.ballList.Count; i++)
             {
@@ -187,7 +193,7 @@ namespace Firmament.Utils
                             }
                             if ((ballA.Tag == 0 && ballB.Tag == 1) || (ballA.Tag == 1 && ballB.Tag == 2) || (ballA.Tag == 1 && ballB.Tag == 0) || (ballA.Tag == 2 && ballB.Tag == 1))
                             {
-                                if (this.rectRect(ballA, ballB))
+                                if (this.IsHit(ballA, ballB))
                                 {
                                     ballA.HitState = true;
                                     ballB.HitState = true;
@@ -204,19 +210,16 @@ namespace Firmament.Utils
                 {
                     Console.WriteLine(e.Message);
                 }
-
-
             }
             //Console.WriteLine("检查次数:", count);
         }
-
         /**
          * cc.Intersection.rectRect
          * @param a 
          * @param b
          * @returns true碰撞 false未碰撞
          */
-        private bool rectRect(BaseElement a, BaseElement b)
+        private bool IsHit(BaseElement a, BaseElement b)
         {
             var a_min_x = a.X - a.Width / 2;
             var a_min_y = a.Y - a.Height / 2;

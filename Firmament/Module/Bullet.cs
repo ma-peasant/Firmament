@@ -1,7 +1,6 @@
 ﻿using Firmament.Utils;
 using System;
 using System.Threading;
-using System.Timers;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -29,8 +28,6 @@ namespace Firmament.Module
             this.image.Stretch = System.Windows.Media.Stretch.UniformToFill;
             Canvas.SetLeft(this.image, this.X);
             Canvas.SetTop(this.image, this.Y);
-           
-            //InitUpdateTimer();
         }
 
 

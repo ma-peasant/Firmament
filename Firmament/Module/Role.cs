@@ -11,6 +11,9 @@ namespace Firmament.Module
     //游戏角色
     public class Role :BaseElement
     {
+        public delegate void  GameOverHandler();
+        public event GameOverHandler GameOverEvent;
+      
         public List<Bullet> bullets = new List<Bullet>();
 
         private CancellationTokenSource cancellation = new CancellationTokenSource();
@@ -47,6 +50,10 @@ namespace Firmament.Module
                     {
                         Common.mainPage.canvas.Children.Remove(this.image);
                         Common.ballList.Remove(this);
+                        //发送全局通知，游戏结束
+                        if (GameOverEvent != null) {
+                            GameOverEvent.Invoke();
+                        }
                     });
                 }
             }

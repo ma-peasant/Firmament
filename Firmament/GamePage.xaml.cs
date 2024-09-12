@@ -1,22 +1,10 @@
 ﻿using Firmament.Module;
 using Firmament.Utils;
-using Firmament.Utils.QuardTree;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Firmament
@@ -26,10 +14,7 @@ namespace Firmament
     /// </summary>
     public partial class GamePage : Page
     {
-       
-
         Role role = null;
-
         bool isSKeyPressed = false;
         bool isLeftKeyPressed = false;
         bool isRightKeyPressed = false;
@@ -222,23 +207,64 @@ namespace Firmament
         }
         #endregion
 
+        private bool isStart = false;
         private void btn_start_Click(object sender, RoutedEventArgs e)
         {
-            //1、创建角色
-            role = new Role();
-            canvas.Children.Add(role.image);
-            quardTreeHelp.InsertElement(role);
-            role.X = canvas.ActualWidth / 2;
-            role.Y = canvas.ActualHeight - 50;
-            //2、让角色位于中间
-            Canvas.SetLeft(role.image, role.X);
-            Canvas.SetTop(role.image, role.Y);
+            if (isStart)
+            {
+                isStart = false;
+                GameSuspend();
+                this.btn_start.Content = "开始游戏";
+            }
+            else {
+                isStart = true;
+                GameStart();
+                this.btn_start.Content = "暂停";
+                this.canvas.Focus();
+                Keyboard.Focus(this.canvas);
+            }
+        }
+
+        //游戏暂停
+        private void GameSuspend() {
+            KeyDownTimer.Stop();
+            ArmyProductTimer.Stop();
+            quardTreeHelp.Suspend();
+        }
+
+        private void GameStart() {
+            if (role == null) {
+                //1、创建角色
+                role = new Role();
+                role.GameOverEvent += Role_GameOverEvent; ;
+                canvas.Children.Add(role.image);
+                quardTreeHelp.InsertElement(role);
+                role.X = canvas.ActualWidth / 2;
+                role.Y = canvas.ActualHeight - 50;
+                //2、让角色位于中间
+                Canvas.SetLeft(role.image, role.X);
+                Canvas.SetTop(role.image, role.Y);
+            }
             //3、启动定时器
             KeyDownTimer.Start();     //按键功能扫描
             ArmyProductTimer.Start(); //生产敌机扫描
             //4、检测碰撞
-            quardTreeHelp.InitUpdateTimer();
+            quardTreeHelp.Start();
         }
 
+        private void Role_GameOverEvent()
+        {
+            //1、游戏结束， 将role清除
+            role.GameOverEvent -= Role_GameOverEvent;
+            role = null;
+            //停止定时器
+            KeyDownTimer.Stop();
+            ArmyProductTimer.Stop();
+            quardTreeHelp.Stop();
+            this.canvas.Children.Clear();
+            this.btn_start.Content = "开始游戏";
+            MessageBox.Show("游戏结束");
+           
+        }
     }
 }
