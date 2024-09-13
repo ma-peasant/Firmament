@@ -128,7 +128,6 @@ namespace Firmament
             role.GameOverEvent -= Role_GameOverEvent;
             role = null;
             //停止定时器
-          
             ArmyProductTimer.Stop();
             quardTreeHelp.Stop();
             this.canvas.Children.Clear();

@@ -115,13 +115,13 @@ namespace Firmament.Module
             }
             Common.mainPage.canvas.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
             {
-                this.X = left;
-                this.Y = top;
-                Canvas.SetLeft(this.image, this.X);
-                Canvas.SetTop(this.image, this.Y);
+            this.X = left;
+            this.Y = top;
+            Canvas.SetLeft(this.image, this.X);
+            Canvas.SetTop(this.image, this.Y);
 
-                if (isSKeyPressed) {
-                    Bullet bullet = new Bullet(this);
+            if (isSKeyPressed) {
+                Bullet bullet = new Bullet(this);
                     Common.mainPage.canvas.Children.Add(bullet.image);
                     Common.quardTreeHelp.InsertElement(bullet);
                 }

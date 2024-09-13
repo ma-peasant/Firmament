@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -13,12 +14,10 @@ namespace Firmament.Utils
     //检测碰撞
     public class QuardTreeHelp
     {
-        System.Timers.Timer timer;
         /**小球列表 */
         private List<BaseElement> ballList;
-        private int interval = 100;
         QuadTree<BaseElement> rootTree;
-        private const int MaxCount = 10;
+        private const int MaxCount = 20;
         //界面边缘
         private double maxWidth;
         private double maxHeight;
@@ -31,8 +30,8 @@ namespace Firmament.Utils
             this.ballList = new List<BaseElement>();
             Common.ballList = this.ballList;
             //舞台边缘值
-            this.maxWidth = canvas.ActualWidth - 10;
-            this.maxHeight = canvas.ActualHeight - 10;
+            maxWidth = canvas.ActualWidth - 10;
+            maxHeight = canvas.ActualHeight - 10;
             rootTree = new QuadTree<BaseElement>(new Rect(0, 0, this.canvas.ActualWidth, this.canvas.ActualHeight), MaxCount);
         }
 
@@ -44,144 +43,49 @@ namespace Firmament.Utils
 
         public void Start()
         {
-            if (timer == null) {
-                timer = new System.Timers.Timer();
-                timer.Interval = this.interval; // 更新间隔，可以根据需要调整   大概就是30帧
-                timer.Elapsed += Timer_Tick; ;
-                timer.Start();
-            }
-            else
-            {
-                timer.Start();
-            }
+            isRun = true;
+            Run();
         }
         //暂停
         public void Suspend()
         {
-            timer.Stop();
+            isRun = false;
         }
         public void Stop() {
-            timer.Stop();
+            isRun = false;
             this.ballList.Clear();
             Common.ballList.Clear();
             //四叉树不用动， 更新角色位置的时候会根据ballList重新计算的
         }
-
-        private void Timer_Tick(object sender, EventArgs e)
+        bool isRun = true;
+        public async void Run()
         {
-            //需要计算小球的矩形情况
-            lock (lockObject)
+            while (isRun)
             {
-                this.UpdateRolePositon();
-                ////检查碰撞
-                this.CheckCollision();
-            }
-        }
-        /// <summary>
-        /// 更新各种角色位置
-        /// </summary>
-        private void UpdateRolePositon()
-        {
-            //更新子弹和敌人的位置，不再单个控制
-            for (int i = 0; i < this.ballList.Count; i++)
-            {
-                if (ballList[i].Tag == 0)
+                lock (lockObject)
                 {
-                    continue;
+                    rootTree.Update(this.ballList.ToList<BaseElement>());
+                    ////检查碰撞
+                    this.ParallelCheckCollision();
                 }
-                else {
-                    if (ballList[i].Tag == 1)
-                    {
-                        UpdatePlanPosition(ballList[i]);
-                    }
-                    else if(ballList[i].Tag == 2) {
-                        UpdateBulletPosition(ballList[i]);
-                    }
-                }
-            }
-            rootTree.Update(this.ballList.ToList<BaseElement>());
-        }
-
-
-        private void UpdatePlanPosition(BaseElement baseElement) {
-            bool isOut = false;
-            baseElement.Y = baseElement.Y + baseElement.YSpeed;
-
-            //边缘检测 达到边缘后速度取反
-            if (baseElement.X + baseElement.Width / 2 > maxWidth || baseElement.X - baseElement.Width / 2 < 0 ||
-             baseElement.Y + baseElement.Height / 2 > maxHeight || baseElement.Y - baseElement.Height / 2 < 0)
-            {
-                isOut = true;
-            }
-
-            if (isOut)
-            {
-                //在UI和四叉树上移除该对象
-                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    Common.ballList.Remove(baseElement);
-                    Common.mainPage.canvas.Children.Remove(baseElement.image);
-                });
-
-            }
-            else
-            {
-                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    Canvas.SetLeft(baseElement.image, baseElement.X);
-                    Canvas.SetTop(baseElement.image, baseElement.Y);
-                });
+                // 控制帧率
+                await Task.Delay(16); // 每秒 60 帧
             }
         }
-        private void UpdateBulletPosition(BaseElement baseElement) {
-            bool isout = false;
 
-            baseElement.Y -= baseElement.YSpeed;
-            //边缘检测 达到边缘后速度取反
-            if (baseElement.X + baseElement.Width / 2 > Common.mainPage.canvas.ActualWidth)
-            {
-                isout = true;
-            }
-            else if (baseElement.X - baseElement.Width / 2 < 0)
-            {
-                isout = true;
-            }
-            if (baseElement.Y + baseElement.Height / 2 > Common.mainPage.canvas.ActualHeight)
-            {
-                isout = true;
-            }
-            else if (baseElement.Y - baseElement.Height / 2 < 0)
-            {
-                isout = true;
-            }
-            if (isout)
-            {
-                //在UI和四叉树上移除该对象
-                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    Common.ballList.Remove(baseElement);
-                    Common.mainPage.canvas.Children.Remove(baseElement.image);
-                });
-            }
-            else
-            {
-                Common.mainPage.Dispatcher.Invoke(DispatcherPriority.Normal, (ThreadStart)delegate
-                {
-                    Canvas.SetLeft(baseElement.image, baseElement.X);
-                    Canvas.SetTop(baseElement.image, baseElement.Y);
-                });
-            }
-        }
-            
-        private void CheckCollision()
-        {
-            for (int i = 0; i < this.ballList.Count; i++)
+
+        private void ParallelCheckCollision() {
+            // 假设 Tag == 0 是主角色，Tag == 1 是敌机
+            var mainAndEnemies = this.ballList.Where(ball => ball.Tag == 0 || ball.Tag == 1).ToList();
+
+            // 对主角色和敌机并行执行逻辑
+            Parallel.ForEach(mainAndEnemies, ballA =>
             {
                 try
                 {
-                    //flag相等的代表是一个节点的， 对同节点的进行判断。 
-                    BaseElement ballA = this.ballList[i];
+                    // 对于同一节点的物体进行判断
                     List<BaseElement> list = this.ballList.Where(ball => ball.Flag == ballA.Flag).ToList();
+
                     if (list != null && list.Count > 0)
                     {
                         for (int j = 0; j < list.Count; j++)
@@ -191,12 +95,22 @@ namespace Firmament.Utils
                             {
                                 break;
                             }
+
+                            // 判断条件，根据 Tag 进行不同的碰撞检测逻辑
                             if ((ballA.Tag == 0 && ballB.Tag == 1) || (ballA.Tag == 1 && ballB.Tag == 2) || (ballA.Tag == 1 && ballB.Tag == 0) || (ballA.Tag == 2 && ballB.Tag == 1))
                             {
                                 if (this.IsHit(ballA, ballB))
                                 {
-                                    ballA.HitState = true;
-                                    ballB.HitState = true;
+                                    // 并发修改时要加锁确保安全
+                                    lock (ballA)
+                                    {
+                                        ballA.HitState = true;
+                                    }
+
+                                    lock (ballB)
+                                    {
+                                        ballB.HitState = true;
+                                    }
                                 }
                             }
                         }
@@ -210,9 +124,9 @@ namespace Firmament.Utils
                 {
                     Console.WriteLine(e.Message);
                 }
-            }
-            //Console.WriteLine("检查次数:", count);
+            });
         }
+
         /**
          * cc.Intersection.rectRect
          * @param a 
@@ -231,5 +145,6 @@ namespace Firmament.Utils
             var b_max_y = b.Y + b.Height / 2;
             return a_min_x <= b_max_x && a_max_x >= b_min_x && a_min_y <= b_max_y && a_max_y >= b_min_y;
         }
+
     }
 }

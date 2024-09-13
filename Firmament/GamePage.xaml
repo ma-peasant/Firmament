@@ -14,8 +14,14 @@
 
 
         <StackPanel Grid.Column="1" Orientation="Vertical">
-            <Label
-                Name="lb_value" Height="30" Content="" />
+            <StackPanel Orientation="Horizontal">
+                <Label
+                    Name="lb_title" Height="30" Content="分数:" Foreground="Black" />
+                <Label
+                    Name="lb_value" Height="30"
+                    Content="{Binding Value}" />
+            </StackPanel>
+
             <Button
                 Name="btn_start" Margin="0,20,0,0" Click="btn_start_Click" Content="START" />
         </StackPanel>
